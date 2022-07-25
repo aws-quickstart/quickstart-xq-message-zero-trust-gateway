@@ -2,22 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS CloudFormation Template: XQ Server running on Linux (qs-xxxxxx)'
 
 Parameters:
-  # Registration
-  # AcceptEULA:
-  #   AllowedPattern: 'yes'
-  #   AllowedValues:
-  #     - 'yes'
-  #     - 'no'
-  #   Description: 'View the EULA at the Link: https://www.xqmsg.com/eula'
-  #   Type: String
-  # RegEmail:
-  #   Description: Company E-mail
-  #   MinLength: '1'
-  #   Type: String
-  # AWS Environment
-  # VPCId:
-  #   Description: The ID of the VPC into which to deploy the cluster
-  #   Type: AWS::EC2::VPC::Id
   PublicSubnetId:
     Description: The public subnet to use
     Type: AWS::EC2::Subnet::Id
@@ -45,9 +29,6 @@ Parameters:
   SGID:
     Description: The ID of the security group
     Type: String
-  # SFTPEndpoint:
-  #   Description: Transfer family endpoint
-  #   Type: String
   # XQ Gateway
   QuantumEndpoint:
     Description: URL for Quantum service endpoint
@@ -67,20 +48,23 @@ Parameters:
   DashboardApiKey:
     Description: Dashboard API key generated from https://manage.xqmsg.com/applications
     Type: String
-  RouteDeviceName:
-    Description: The name of the device
+  TeamId:
+    Description: XQ Team ID associated with Gateway
     Type: String
-  RouteConfigName:
-    Description: The trusted range configuration name for internal use
+  GatewayConfigId:
+    Description: ID from the Gateway configuration page
     Type: String
-  RouteConfigTeam:
-    Description: The ID of the workspace that this trusted range is associated with
+  TrustedRangeKey:
+    Description: The gateway config secure key from the dashboard
     Type: String
-  RouteConfigKey:
-    Description: Secret key for trusted range from https://manage.xqmsg.com/trusted
+  HeartBeatInterval:
+    Description: Number of seconds between each client-server heartbeat
     Type: String
-  RoutePort:
-    Description: The network port on which this gateway will listen for traffic from the external gateway
+  MonitorSocket:
+    Description: The port number that the monitor application will listen to for UDP updates from the gateway
+    Type: String
+  GatewaySocket:
+    Description: The port number that the gateway will listen to for UDP requests for the monitor
     Type: String
 Mappings:
   AWSAMIRegionMap:
@@ -95,15 +79,52 @@ Mappings:
     us-west-2:
       XQSG: ami-0ca285d4c2cda3300
   DefaultConfiguration:
-    InstallationConfig:
-      XQServerInstaller: https://s3-us-east-1.amazonaws.com/XQ-quickstart/XQ-server-2020-1-0.x86_64.rpm
-      AutomatedInstaller: https://s3-us-west-2.amazonaws.com/XQ-quickstart/automated-installer
     MachineConfiguration:
       SystemVolumeSize: 20
       CentosVersion: XQSG
 Resources:
-  XQServer:
-    Type: AWS::EC2::Instance
+  XqsgRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+  XqsgPolicy: 
+    Type: "AWS::IAM::Policy"
+    Properties: 
+      PolicyName: "root"
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Resource: "*"
+            Action: [
+              "ec2:AssociateAddress",
+              "ec2:DisassociateAddress"
+            ]
+      Roles: 
+        - Ref: "XqsgRole"
+  XqsgInstanceProfile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - Ref: "XqsgRole"
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      # InstanceId: !Ref 'XQServer'
+      Domain: 'vpc'
+  LaunchConfiguration:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
     Metadata:
       AWS::CloudFormation::Init:
         config:
@@ -111,10 +132,10 @@ Resources:
             yum:
               awscli: []
     Properties:
-      SecurityGroupIds:
+      SecurityGroups:
         - !Ref 'SGID'
-      SubnetId: !Ref 'PublicSubnetId'
       InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref XqsgInstanceProfile
       ImageId: !FindInMap
         - AWSAMIRegionMap
         - !Ref 'AWS::Region'
@@ -145,11 +166,15 @@ Resources:
             yum clean all
 
             # Install dependencies and unpack gateway software
-            yum install -y openssl11 curl curl-devel cmake3 gcc gcc-c++ kernel-devel libpcap-devel openssl11-devel nmap
+            yum install -y openssl11 curl curl-devel cmake3 gcc gcc-c++ kernel-devel libpcap-devel openssl11-devel nmap awscli
             mkdir -p /usr/local/xq/
             wget https://xqmsg.com/download/xqsg-v2-rhel.tar -P /usr/local/xq/
             tar -xvf /usr/local/xq/xqsg-v2-rhel.tar -C /usr/local/xq/
             rm -rf /usr/local/xq/xqsg-v2-rhel.tar
+
+            # Associate elastic IP with instance
+            instanceid=`curl http://169.254.169.254/latest/meta-data/instance-id`
+            aws ec2 associate-address --instance-id $instanceid --allocation-id ${EIP.AllocationId} --allow-reassociation --region ${AWS::Region}
 
             # Get instance metadata
             localip=`curl http://169.254.169.254/latest/meta-data/local-ipv4`
@@ -158,17 +183,17 @@ Resources:
             sftpe=`nmap -n -sn -T5 ${PublicSubnet1CIDR} --exclude $localip,$gw -oG - | awk '/Up$/{print $2}'`
 
             # Setup systemd for xqsg service
-            echo "[Unit]" > /etc/systemd/system/xqsg.service
-            echo "Description = XQ Secure Gateway" >> /etc/systemd/system/xqsg.service
-            echo "After = network.target" >> /etc/systemd/system/xqsg.service
-            echo "" >> /etc/systemd/system/xqsg.service
-            echo "[Service]" >> /etc/systemd/system/xqsg.service
-            echo "ExecStart = /usr/local/xq/xqsg/xqsg -c /usr/local/xq/xqsg/xq.ini -r /usr/local/xq/xqsg/routing.json" >> /etc/systemd/system/xqsg.service
-            echo "Restart = always" >> /etc/systemd/system/xqsg.service
-            echo "" >> /etc/systemd/system/xqsg.service
-            echo "[Install]" >> /etc/systemd/system/xqsg.service
-            echo "WantedBy = multi-user.target" >> /etc/systemd/system/xqsg.service
-            echo "" >> /etc/systemd/system/xqsg.service
+            echo "[Unit]" > /etc/systemd/system/xqmon.service
+            echo "Description = XQ Secure Gateway Monitor" >> /etc/systemd/system/xqmon.service
+            echo "After = network.target" >> /etc/systemd/system/xqmon.service
+            echo "" >> /etc/systemd/system/xqmon.service
+            echo "[Service]" >> /etc/systemd/system/xqmon.service
+            echo "ExecStart = /usr/local/xq/xqsg/xqmon -c /usr/local/xq/xqsg/xq.ini -r /usr/local/xq/xqsg/routing.json -g /usr/local/xq/xqsg/xqsg" >> /etc/systemd/system/xqmon.service
+            echo "Restart = always" >> /etc/systemd/system/xqmon.service
+            echo "" >> /etc/systemd/system/xqmon.service
+            echo "[Install]" >> /etc/systemd/system/xqmon.service
+            echo "WantedBy = multi-user.target" >> /etc/systemd/system/xqmon.service
+            echo "" >> /etc/systemd/system/xqmon.service
 
             # /usr/local/xq/xqsg/xq.ini
             echo "; XQ configuration file." > /usr/local/xq/xqsg/xq.ini
@@ -182,287 +207,43 @@ Resources:
             echo "[ApiKeys]" >> /usr/local/xq/xqsg/xq.ini
             echo "XQ=${XqApiKey}" >> /usr/local/xq/xqsg/xq.ini
             echo "Dashboard=${DashboardApiKey}" >> /usr/local/xq/xqsg/xq.ini
-
-            # /usr/local/xq/xqsg/routing.json
-            echo "{" > /usr/local/xq/xqsg/routing.json
-            echo "    \"log_level\":\"info\"," >> /usr/local/xq/xqsg/routing.json
-            echo "    \"worker_thread_count\" : 5," >> /usr/local/xq/xqsg/routing.json
-            echo "    \"min_worker_connections\" : 3," >> /usr/local/xq/xqsg/routing.json
-            echo "    \"max_worker_connections\" : 30," >> /usr/local/xq/xqsg/routing.json
-            echo "    \"devices\":[" >> /usr/local/xq/xqsg/routing.json
-            echo "        {" >> /usr/local/xq/xqsg/routing.json
-            echo "            \"name\":\"${RouteDeviceName}\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"addresses\":[\"127.0.0.1\",\"`curl http://169.254.169.254/latest/meta-data/local-ipv4`\",\"`curl http://169.254.169.254/latest/meta-data/public-ipv4`\"]" >> /usr/local/xq/xqsg/routing.json
-            echo "        }" >> /usr/local/xq/xqsg/routing.json
-            echo "    ]," >> /usr/local/xq/xqsg/routing.json
-            echo "    \"configs\":[" >> /usr/local/xq/xqsg/routing.json
-            echo "        {" >> /usr/local/xq/xqsg/routing.json
-            echo "            \"name\":\"${RouteConfigName}\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"team\": ${RouteConfigTeam}," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"key\":\"${RouteConfigKey}\"" >> /usr/local/xq/xqsg/routing.json
-            echo "        }" >> /usr/local/xq/xqsg/routing.json
-            echo "    ]," >> /usr/local/xq/xqsg/routing.json
-            echo "    \"routes\": [" >> /usr/local/xq/xqsg/routing.json
-            echo "        {" >> /usr/local/xq/xqsg/routing.json
-            echo "            \"title\":\"dec_in\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"type\":\"dec\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"trransport\":\"standard\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"ip\":\"0.0.0.0\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"protocol\":\"tcp\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"port\":${RoutePort}," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"filter\":\"tcp port ${RoutePort}\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"interface\":\"eth0\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"config\":\"${RouteConfigName}\"," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"concurrent\": 512," >> /usr/local/xq/xqsg/routing.json
-            echo "            \"mapping\": [" >> /usr/local/xq/xqsg/routing.json
-            echo "                {" >> /usr/local/xq/xqsg/routing.json
-            echo "                    \"name\":\"send to transfer family\"," >> /usr/local/xq/xqsg/routing.json
-            echo "                    \"protocol\":\"tcp\"," >> /usr/local/xq/xqsg/routing.json
-            echo "                    \"ip\":\"$sftpe\"," >> /usr/local/xq/xqsg/routing.json
-            echo "                    \"transport\":\"standard\"," >> /usr/local/xq/xqsg/routing.json
-            echo "                    \"port\":22" >> /usr/local/xq/xqsg/routing.json
-            echo "                }" >> /usr/local/xq/xqsg/routing.json
-            echo "            ]" >> /usr/local/xq/xqsg/routing.json
-            echo "        }" >> /usr/local/xq/xqsg/routing.json
-            echo "    ]" >> /usr/local/xq/xqsg/routing.json
-            echo "}" >> /usr/local/xq/xqsg/routing.json
+            echo "" >> /usr/local/xq/xqsg/xq.ini
+            echo "[Monitor]" >> /usr/local/xq/xqsg/xq.ini
+            echo "Team=${TeamId}" >> /usr/local/xq/xqsg/xq.ini
+            echo "Gateway=${GatewayConfigId}" >> /usr/local/xq/xqsg/xq.ini
+            echo "Interval=${HeartBeatInterval}" >> /usr/local/xq/xqsg/xq.ini
+            echo "MonitorSock=${MonitorSocket}" >> /usr/local/xq/xqsg/xq.ini
+            echo "GatewaySock=${GatewaySocket}" >> /usr/local/xq/xqsg/xq.ini
+            echo "Key=${TrustedRangeKey}" >> /usr/local/xq/xqsg/xq.ini
 
             # start XQSG
-            systemctl enable xqsg.service
-            systemctl start xqsg.service
+            systemctl enable xqmon.service
+            systemctl start xqmon.service
 
             # Signal the status from cfn-init
             # /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource XQServer --region ${AWS::Region}
-      Tags:
-        - Key: Name
-          Value: !Sub '${AWS::StackName}-cfn-XQ-server-linux'
-  EIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      InstanceId: !Ref 'XQServer'
-      Domain: 'vpc'
-
-
-LaunchConfiguration:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
-    Metadata:
-      AWS::CloudFormation::Authentication:
-        S3AccessCreds:
-          type: S3
-          roleName: !Ref OrchestratorIamRole
-          buckets: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
-      AWS::CloudFormation::Init:
-        configSets:
-          config:
-            - cloudwatch_install
-            - cloudwatch_setup
-            - cloudwatch_agent_restart
-            - setup
-            - prerequisites
-            - install
-          marketplaceConfig:
-            - cloudwatch_install
-            - cloudwatch_setup
-            - cloudwatch_agent_restart
-            - install
-        cloudwatch_install:
-          files:
-            C:\cfn\sources\amazon-cloudwatch-agent.msi:
-              source: 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi'
-          commands:
-            a-install-cloudwatch-agent:
-              command: start /wait msiexec /i c:\cfn\sources\amazon-cloudwatch-agent.msi /qn /quiet /passive /norestart
-              waitAfterCompletion: '0'
-        cloudwatch_setup:
-          files:
-            "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\amazon-cloudwatch-agent.json":
-              content: !Sub |
-                {
-                  "logs": {
-                    "logs_collected": {
-                      "files": {
-                        "collect_list": [
-                          {
-                            "file_path": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
-                            "log_group_name": "/aws/ec2/${AWS::StackName}/{instance_id}",
-                            "log_stream_name": "cloudwatch-agent.log"
-                          },
-                          {
-                            "file_path": "c:\\cfn\\log\\cfn-init.log",
-                            "log_group_name": "/aws/ec2/${AWS::StackName}/{instance_id}",
-                            "log_stream_name": "cfn-init.log"
-                          },
-                          {
-                            "file_path": "c:\\cfn\\log\\cfn-wire.log",
-                            "log_group_name": "/aws/ec2/${AWS::StackName}/{instance_id}",
-                            "log_stream_name": "cfn-wire.log"
-                          },
-                          {
-                            "file_path": "c:\\cfn\\log\\cfn-init-cmd.log",
-                            "log_group_name": "/aws/ec2/${AWS::StackName}/{instance_id}",
-                            "log_stream_name": "cfn-init-cmd.log"
-                          },
-                          {
-                            "file_path": "c:\\cfn\\log\\install.log",
-                            "log_group_name": "/aws/ec2/${AWS::StackName}/{instance_id}",
-                            "log_stream_name": "install.log"
-                          },
-                          {
-                            "file_path": "c:\\cfn\\log\\cfn-hup.log",
-                            "log_group_name": "/aws/ec2/${AWS::StackName}/{instance_id}",
-                            "log_stream_name": "cfn-hup.log"
-                          }
-                        ]
-                      },
-                    "log_stream_name": "default.log"
-                  }
-                }
-        cloudwatch_agent_restart:
-          commands:
-            01_stop_service:
-              command: powershell -Command "C:\\'Program Files'\\Amazon\\AmazonCloudWatchAgent\\amazon-cloudwatch-agent-ctl.ps1 -a stop"
-            02_start_service:
-              command: powershell -Command "C:\\'Program Files'\\Amazon\\AmazonCloudWatchAgent\\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\amazon-cloudwatch-agent.json -s"
-        setup:
-          files:
-            c:\cfn\scripts\Install-UiPathOrchestrator.ps1:
-              source:
-                !Sub
-                - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/Install-UiPathOrchestrator.ps1'
-                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
-                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
-              authentication: S3AccessCreds
-        prerequisites:
-          files:
-            c:\cfn\sources\UiPathOrchestrator.msi:
-              source: !Sub 'https://download.uipath.com/versions/${OrchestratorVersion}/UiPathOrchestrator.msi'
-            c:\cfn\sources\NDP472-KB4054530-x86-x64-AllOS-ENU.exe:
-              source: https://download.visualstudio.microsoft.com/download/pr/1f5af042-d0e4-4002-9c59-9ba66bcf15f6/089f837de42708daacaae7c04b7494db/NDP472-KB4054530-x86-x64-AllOS-ENU.exe
-            c:\cfn\sources\rewrite_amd64_en-US.msi:
-              source: https://download.microsoft.com/download/1/2/8/128E2E22-C1B9-44A4-BE2A-5859ED1D4592/rewrite_amd64_en-US.msi
-            c:\cfn\sources\dotnet-hosting-3.1.8-win.exe:
-              source: https://download.visualstudio.microsoft.com/download/pr/854cbd11-4b96-4a44-9664-b95991c0c4f7/8ec4944a5bd770faba2f769e647b1e6e/dotnet-hosting-3.1.8-win.exe
-          commands:
-            a-install-dotnet-framework:
-              command: start /wait c:\cfn\sources\NDP472-KB4054530-x86-x64-AllOS-ENU.exe /q /norestart
-              waitAfterCompletion: '0'
-        install:
-          commands:
-            a-execute-install:
-              command: !Join
-                - ' '
-                - - 'powershell.exe -command C:\cfn\scripts\Install-UiPathOrchestrator.ps1'
-                  - '-databaseServerName'
-                  - !Ref DatabaseServerName
-                  - '-databaseName'
-                  - !Ref DatabaseName
-                  - '-databaseUserName'
-                  - !Ref DatabaseUsername
-                  - '-databaseUserPassword'
-                  - !Ref DatabasePassword
-                  - '-orchestratorAdminPassword'
-                  - !Ref OrchestratorPassword
-                  - '-redisServerHost'
-                  - !Join
-                    - ','
-                    - - !Ref HAMainPrivateIP
-                      - !Ref HASecondary1PrivateIP
-                      - !Ref HASecondary2PrivateIP
-                  - '-redisServerPort'
-                  - !Ref HAPort
-                  - '-redisServerPassword'
-                  - !Ref HAAPassword
-                  - '-configS3BucketName'
-                  - !Ref ConfigS3Bucket
-                  - '-configTableName'
-                  - !Ref ConfigTable
-                  - '-orchestratorLicenseCode'
-                  - !Join
-                    - ''
-                    - - '''"'
-                      - !Ref OrchestratorLicense
-                      - '"'''
-                  - '-publicUrl'
-                  - !Sub 'https://${Fqdn}'
-                  - '-NuGetStoragePath'
-                  - !Sub '${GatewayPrivateIP}\${NugetStorageBucketName}'
-                  - '-Verbose'
-              waitAfterCompletion: '0'
-    Properties:
-      AssociatePublicIpAddress: false
-      BlockDeviceMappings:
-        - DeviceName: !GetAtt HostInstanceAMI.RootDeviceName
-          Ebs:
-            DeleteOnTermination: true
-            Encrypted: true
-            VolumeSize: 100
-            VolumeType: gp2
-      ImageId: !If 
-        - IsMarketplaceDeployment
-        - !FindInMap
-          - RegionMap
-          - !Ref 'AWS::Region'
-          - x8664
-        - !GetAtt HostInstanceAMI.ImageId 
-      IamInstanceProfile: !GetAtt OrchestratorInstanceProfile.Arn
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref KeyPairName
-      PlacementTenancy: default
-      SecurityGroups:
-        - !Ref OrchestratorSecurityGroup
-      UserData: 
-        !If 
-          - IsMarketplaceDeployment
-          - !Base64
-              Fn::Sub: | 
-                <script>
-                cfn-init.exe -v -c marketplaceConfig -s ${AWS::StackId} -r LaunchConfiguration --region ${AWS::Region}
-                cfn-signal.exe -e %errorlevel% --stack ${AWS::StackId} --resource AutoScalingGroup --region ${AWS::Region}
-                </script>
-          - !Base64
-              Fn::Sub: | 
-                <script>
-                cfn-init.exe -v -c config -s ${AWS::StackId} -r LaunchConfiguration --region ${AWS::Region}
-                cfn-signal.exe -e %errorlevel% --stack ${AWS::StackId} --resource AutoScalingGroup --region ${AWS::Region}
-                </script>     
   AutoScalingGroup:
     Type: 'AWS::AutoScaling::AutoScalingGroup'
-    CreationPolicy:
-      ResourceSignal:
-        Count: !Ref OrchestratorInstanceCount
-        Timeout: PT1H
     Properties:
-      DesiredCapacity: !Ref OrchestratorInstanceCount
+      DesiredCapacity: '1'
       HealthCheckType: EC2
       LaunchConfigurationName: !Ref LaunchConfiguration
-      MaxSize: '20'
+      MaxSize: '1'
       MetricsCollection:
         - Granularity: 1Minute
           Metrics:
             - GroupMinSize
             - GroupMaxSize
-            - GroupDesiredCapacity
-            - GroupInServiceInstances
-            - GroupTotalInstances
-      MinSize: !Ref OrchestratorInstanceCount
+      MinSize: '0'
       Tags:
         - Key: Name
           PropagateAtLaunch: true
-          Value: !Sub '${AWS::StackName}-UIPath-Orchestrator'
-      TargetGroupARNs:
-        - !Ref TargetGroupARN
-      VPCZoneIdentifier: !Ref PrivateSubnetIDs
-
-
-
-
+          Value: !Sub '${AWS::StackName}-cfn-XQ-server-linux'
+      # TargetGroupARNs:
+      #   - !Ref TargetGroupARN
+      VPCZoneIdentifier: 
+        - !Ref 'PublicSubnetId'
 Outputs:
-  InstanceID:
-    Description: EC2 InstanceID of the instance running XQ Server
-    Value: !Ref 'XQServer'
-  PublicIPAddress:
-    Description: Public IP Address of instance running XQ Server
-    Value: !GetAtt 'XQServer.PublicIp'
   ElasticIP:
     Description: Elastic IP attached to the XQ Server
     Value: !GetAtt 'EIP.AllocationId'

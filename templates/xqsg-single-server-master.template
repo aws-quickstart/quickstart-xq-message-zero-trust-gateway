@@ -3,12 +3,6 @@ Description: 'AWS CloudFormation Template: Single-node XQ Secure Gateway (qs-xxx
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      # Registration
-      - Label:
-          default: Registration
-        Parameters:
-          - AcceptEULA
-          - RegEmail
       # AWS Environment
       - Label:
           default: AWS Environment and Machine Configuration
@@ -37,10 +31,12 @@ Metadata:
           - ManageEndpoint
           - XqApiKey
           - DashboardApiKey
-          - RouteDeviceName
-          - RouteConfigName
-          - RouteConfigTeam
-          - RouteConfigKey
+          - TeamId
+          - GatewayConfigId
+          - TrustedRangeKey
+          - HeartBeatInterval
+          - MonitorSocket
+          - GatewaySocket
           - RoutePort
       # QuickStart
       - Label:
@@ -50,11 +46,6 @@ Metadata:
           - QSS3KeyPrefix
           - QSS3BucketRegion
     ParameterLabels:
-      # Registration
-      AcceptEULA:
-        default: Accept XQ End User License Agreement
-      RegEmail:
-        default: Company E-mail
       # AWS Environment
       VPCCIDR:
         default: VPC CIDR
@@ -90,16 +81,20 @@ Metadata:
         default: General API key
       DashboardApiKey:
         default: Dashboard API key
-      RouteDeviceName:
-        default: The name of the device
-      RouteConfigName:
-        default: The trusted range configuration name for internal use
-      RouteConfigTeam:
-        default: The ID of the workspace that this trusted range is associated with
-      RouteConfigKey:
-        default: Secret key for trusted range
+      TeamId:
+        default: XQ Team ID associated with Gateway
+      GatewayConfigId:
+        default: ID from the Gateway configuration page
+      TrustedRangeKey:
+        default: The gateway config secure key from the dashboard
+      HeartBeatInterval:
+        default: Number of seconds between each client-server heartbeat
+      MonitorSocket:
+        default: The port number that the monitor application will listen to for UDP updates from the gateway
+      GatewaySocket:
+        default: The port number that the gateway will listen to for UDP requests for the monitor
       RoutePort:
-        default: Network port for route
+        default: The port that the XQSG will be receiving traffic on - for security group configuration
       # Quickstart
       QSS3BucketName:
         default: Quick Start S3 Bucket Name
@@ -108,18 +103,6 @@ Metadata:
       QSS3BucketRegion:
         default: Quick Start S3 bucket region
 Parameters:
-  # Registration
-  AcceptEULA:
-    AllowedPattern: 'yes'
-    AllowedValues:
-      - 'yes'
-      - 'no'
-    Description: 'View the EULA at the Link: https://xqmsg.com/eula'
-    Type: String
-  RegEmail:
-    Description: Company E-mail
-    Default: dan@xqmsg.com
-    Type: String
   # AWS Environment
   VPCCIDR:
     AllowedPattern: '[a-zA-Z0-9]+\..+'
@@ -200,21 +183,29 @@ Parameters:
   DashboardApiKey:
     Description: Dashboard API key generated from https://manage.xqmsg.com/applications
     Type: String
-  RouteDeviceName:
-    Description: The name of the device
+  TeamId:
+    Description: XQ Team ID associated with Gateway
     Type: String
-  RouteConfigName:
-    Description: The trusted range configuration name for internal use
+  GatewayConfigId:
+    Description: ID from the Gateway configuration page
     Type: String
-  RouteConfigTeam:
-    Description: The ID of the workspace that this trusted range is associated with
+  TrustedRangeKey:
+    Description: The gateway config secure key from the dashboard
     Type: String
-  RouteConfigKey:
-    Description: Secret key for trusted range from https://manage.xqmsg.com/trusted
+  HeartBeatInterval:
+    Description: Number of seconds between each client-server heartbeat
+    Default: 60
+    Type: String
+  MonitorSocket:
+    Description: The port number that the monitor application will listen to for UDP updates from the gateway
+    Default: 9091
+    Type: String
+  GatewaySocket:
+    Description: The port number that the gateway will listen to for UDP requests for the monitor
+    Default: 9092
     Type: String
   RoutePort:
-    Description: The network port on which this gateway will listen for traffic from the external gateway
-    Default: 3082
+    Description: The port that the XQSG will be receiving traffic on - for security group configuration
     Type: String
   # QuickStart
   QSS3BucketName:
@@ -286,26 +277,23 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        AcceptEULA: !Ref 'AcceptEULA'
         InstanceType: !Ref 'InstanceType'
         KeyPairName: !Ref 'KeyPairName'
         PublicSubnetId: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
-        RegEmail: !Ref 'RegEmail'
         SGID: !GetAtt 'SGStack.Outputs.SGID'
-        VPCId: !GetAtt 'VPCStack.Outputs.VPCID'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
-        SFTPEndpoint: !Sub ${SFTPStack.Outputs.SftpServer}.server.transfer.${AWS::Region}.amazonaws.com
         QuantumEndpoint: !Ref 'QuantumEndpoint'
         ValidationEndpoint: !Ref 'ValidationEndpoint'
         SubscriptionEndpoint: !Ref 'SubscriptionEndpoint'
         ManageEndpoint: !Ref 'ManageEndpoint'
         XqApiKey: !Ref 'XqApiKey'
         DashboardApiKey: !Ref 'DashboardApiKey'
-        RouteDeviceName: !Ref 'RouteDeviceName'
-        RouteConfigName: !Ref 'RouteConfigName'
-        RouteConfigTeam: !Ref 'RouteConfigTeam'
-        RouteConfigKey: !Ref 'RouteConfigKey'
-        RoutePort: !Ref 'RoutePort'
+        TeamId: !Ref 'TeamId'
+        GatewayConfigId: !Ref 'GatewayConfigId'
+        TrustedRangeKey: !Ref 'TrustedRangeKey'
+        HeartBeatInterval: !Ref 'HeartBeatInterval'
+        MonitorSocket: !Ref 'MonitorSocket'
+        GatewaySocket: !Ref 'GatewaySocket'
   # need to be able to use the same SG between gateway and sftp stacks, may need a separate stack
   SFTPStack:
     Type: AWS::CloudFormation::Stack
