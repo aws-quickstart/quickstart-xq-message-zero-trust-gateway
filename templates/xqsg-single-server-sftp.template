@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation Template: XQ Server running on Linux (qs-xxxxxx)'
+
+Parameters:
+  VPCID:
+    Type: AWS::EC2::VPC::Id
+    Description: Target VPC
+  PublicSubnet1ID:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet 1
+  PublicSubnet2ID:
+    Type: AWS::EC2::Subnet::Id 
+    Description: Subnet 2
+  SGID:
+    Description: The ID of the security group
+    Type: String
+  SftpUserName:
+    Type: String
+    Description: Username for SFTP access
+  SftpPubKey:
+    Type: String
+    Description: Public key for SFTP access
+  SftpBucketName:
+    Description: Unique name for SFTP data bucket
+    Type: String
+
+Resources:
+  SFTPServer:
+      Type : AWS::Transfer::Server
+      Properties :
+        EndpointDetails:
+          SubnetIds:
+            - !Sub '${PublicSubnet1ID}'
+            - !Sub '${PublicSubnet2ID}'
+          SecurityGroupIds: 
+            - !Sub '${SGID}'
+          VpcId: !Sub '${VPCID}'
+        EndpointType: VPC
+        Protocols: 
+            - SFTP
+        SecurityPolicyName: 'TransferSecurityPolicy-2022-03'
+        IdentityProviderType: SERVICE_MANAGED
+        PreAuthenticationLoginBanner: 'Your data is being protected by the Secure Gateway from XQ Message!'
+        Tags: 
+          - Key: KeyName
+            Value: ValueName
+
+  SFTPServerS3Bucket:
+    Type: AWS::S3::Bucket
+    # DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub '${SftpBucketName}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Application
+          Value: !Sub '${AWS::StackName}-sftp-server'
+
+  SFTPUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - transfer.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: S3FullAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListAllMyBuckets
+                  - s3:GetBucketLocation
+                Resource: "*"
+        - PolicyName: AllowListingOfUserFolder
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt SFTPServerS3Bucket.Arn
+        - PolicyName: HomeDirObjectAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:DeleteObject
+                  - s3:DeleteObjectVersion
+                Resource: !Sub "${SFTPServerS3Bucket.Arn}/*"
+
+  SFTPUser:
+    Type: AWS::Transfer::User
+    Properties:
+      ServerId: !GetAtt SFTPServer.ServerId
+      UserName: !Sub '${SftpUserName}'
+      HomeDirectory: !Sub '/${SFTPServerS3Bucket}/home/${SftpUserName}'
+      Policy: >
+          {
+            "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "AllowListingOfUserFolder",
+                            "Effect": "Allow",
+                            "Action": "s3:ListBucket",
+                            "Resource": "arn:aws:s3:::${transfer:HomeBucket}",
+                            "Condition": {
+                                "StringLike": {
+                                    "s3:prefix": [
+                                        "home/${transfer:UserName}/*",
+                                        "home/${transfer:UserName}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "Sid": "HomeDirObjectAccess",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetObject",
+                                "s3:GetObjectVersion",
+                                "s3:DeleteObject",
+                                "s3:DeleteObjectVersion"
+                            ],
+                            "Resource": "arn:aws:s3:::${transfer:HomeDirectory}*"
+                        }
+                    ]
+            }
+      Role: !GetAtt SFTPUserRole.Arn
+      SshPublicKeys:
+        - !Sub '${SftpPubKey}'
+      Tags:
+        - Key: Application
+          Value: !Sub '${AWS::StackName}-sftp-server'
+Outputs:
+  SftpServer:
+    Description: The Transfer Family server
+    Value: !GetAtt 'SFTPServer.ServerId'
+  SftpBucket:
+    Description: The S3 Bucket for Transfer Family
+    Value: !Ref 'SFTPServerS3Bucket'
+  SftpUser:
+    Description: The Transfer Family user
+    Value: !Ref 'SFTPUser'
