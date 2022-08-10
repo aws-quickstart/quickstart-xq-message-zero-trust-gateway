@@ -145,7 +145,6 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
     Description: The CIDR address from your gateway will receive traffic
-    Default: 71.171.96.184/32
     Type: String
   # AWS Transfer Family
   SftpUserName:
@@ -154,11 +153,9 @@ Parameters:
     Type: String
   SftpPubKey:
     Description: Public key for SFTP access.
-    Default: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDONePxaT47/N/zmo34pGJ5DitYI9QtV1PM97XhRdQZMbUQxf6xI/ACs5mTjN4+cGUiRHubzJLy+tWV5DQb+iizZiFLTvDyqApO8Vz5c0kF0XNZ5ftP0gnVRV2kxww8xWmtzaI3YyGPZHN8MD61b6bCAc8J/U8LC07ZkMG54AVm2KmnsbiKmr3jLgjbxSoKnTzOAHSCIWcBQF6WZ87EI3unvGj5CoOaWuCRpFUXlendqRAyMeqQ5B0BN7jj5CMPwDzuHnUYDzebZVBt/A5ZXqRhq5kLodG9Acux9qc+cEP+ZDIILzkTeCRXp80VIskCJPcdnkP+Zk+0DktOsPom4y1829J+ugDNA3otSRpvlGYSgl84qqhLYkEC0zCvmXUx8CyITrwBDYCaNkMFsAYSOJOzJ77Mbeor2doUTpbw9AkOlBvuCEzP0R2QCoevC+Mx1gRDbSuCRuvEn8hSXZZs0a3v5xMVEORsxfSYT8Wppoq0F3ogfWDRB1XaY293rW5CqkLOsGtajo/ps0Uo9FFvWD8oTDn6jF/xoU4MyvgFM2NLNwhL0H6QwJB7i16QJZgLCPAJ9lCgOGIc2JAvgq35VLIybgfcQWietgzZUSnLKGQRlA5uGhqPvcs/1bQ3ufzMcygW4II1W8mW7eOQmbiCQsns3UX/k89UTGMIPgI4EtR1gw== dcybulski@localhost
     Type: String
   SftpBucketName:
     Description: Unique name for SFTP data bucket.
-    Default: 'xqmsg-random-awesome-sftp-bucket'
     Type: String
   # XQ Gateway
   QuantumEndpoint:
