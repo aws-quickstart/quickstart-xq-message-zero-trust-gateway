@@ -3,6 +3,5 @@ ci/taskcat-dev*
 .DS_Store
 venv/
 .idea/
-.taskcat.yml
 .taskcat/
 taskcat_outputs/

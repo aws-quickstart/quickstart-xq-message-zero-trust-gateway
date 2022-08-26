@@ -1,0 +1,41 @@
+project:
+  name: quickstart-xq-securegateway
+  owner: quickstart@xqmsg.com
+  package_lambda: false
+  shorten_stack_name: true
+  s3_regional_buckets: true
+  regions:
+  - us-east-1
+tests:
+  xqsg-server:
+    parameters:
+      VPCCIDR: 10.0.0.0/16
+      AvailabilityZones: $[alfred_getaz_3]
+      PublicSubnet1CIDR: 10.0.129.0/24
+      PublicSubnet2CIDR: 10.0.145.0/24
+      KeyPairName: ''
+      InstanceType: c4.large
+      SourceCIDR: 
+      SftpUserName: sftpuser
+      SftpPubKey: ''
+      SftpBucketName: ''
+      QuantumEndpoint: https://quantum.xqmsg.net/v2
+      ValidationEndpoint: https://stg-validation.xqmsg.net/v2
+      SubscriptionEndpoint: https://stg-subscription.xqmsg.net/v2
+      ManageEndpoint: https://stg-dashboard.xqmsg.net/v2
+      XqApiKey: ''
+      DashboardApiKey: ''
+      TeamId: ''
+      GatewayConfigId: ''
+      TrustedRangeKey: ''
+      HeartBeatInterval: '30'
+      MonitorSocket: '9091'
+      GatewaySocket: '9092'
+      RoutePort: '3081'
+      QSS3BucketName: 
+      QSS3KeyPrefix: 
+      QSS3BucketRegion: 'us-east-1'
+    regions:
+    - us-east-1
+    template: templates/xqsg-single-server-master.template
+
