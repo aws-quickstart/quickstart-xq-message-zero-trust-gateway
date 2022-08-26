@@ -14,20 +14,20 @@ tests:
       PublicSubnet1CIDR: 10.0.129.0/24
       PublicSubnet2CIDR: 10.0.145.0/24
       KeyPairName: ''
-      InstanceType: c4.large
-      SourceCIDR: 
+      InstanceType: 't3.large'
+      SourceCIDR: 10.0.0.0/16
       SftpUserName: sftpuser
-      SftpPubKey: ''
+      SftpPubKey: 'ssh-rsa AAAA'
       SftpBucketName: ''
       QuantumEndpoint: https://quantum.xqmsg.net/v2
       ValidationEndpoint: https://stg-validation.xqmsg.net/v2
       SubscriptionEndpoint: https://stg-subscription.xqmsg.net/v2
       ManageEndpoint: https://stg-dashboard.xqmsg.net/v2
-      XqApiKey: ''
-      DashboardApiKey: ''
-      TeamId: ''
-      GatewayConfigId: ''
-      TrustedRangeKey: ''
+      XqApiKey: '1'
+      DashboardApiKey: '1'
+      TeamId: '1'
+      GatewayConfigId: '1'
+      TrustedRangeKey: '1'
       HeartBeatInterval: '30'
       MonitorSocket: '9091'
       GatewaySocket: '9092'
