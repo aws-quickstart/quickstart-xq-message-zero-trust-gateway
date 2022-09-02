@@ -6,13 +6,13 @@
 * In the left side navigation menu select the IP Ranges option.
 
 [#predeploy1]
-.Quick Start architecture for {partner-product-short-name} on AWS
+.Quick Start post-deployment for {partner-product-short-name} on AWS
 image::../images/predeploy1.png[Predeployment]
 
 * Click the previously created IP Range (i.e. “Site-To-AWS”) and add the publicly accessible IP of the newly created EC2 instance.
 
 [#predeploy2]
-.Quick Start architecture for {partner-product-short-name} on AWS
+.Quick Start post-deployment for {partner-product-short-name} on AWS
 image::../images/predeploy2.png[Predeployment]
 
 === Configure the recently deployed gateway
@@ -20,19 +20,19 @@ image::../images/predeploy2.png[Predeployment]
 * In the left side navigation menu select the Gateways option and select the previously created gateway. (i.e. AWS-Gateway)
 
 [#predeploy3]
-.Quick Start architecture for {partner-product-short-name} on AWS
+.Quick Start post-deployment for {partner-product-short-name} on AWS
 image::../images/predeploy3.png[Predeployment]
 
 * Input the Gateways Connection IP as the public IPV4 address of the EC2 instance generated through the quickstart. Additionally input any local IP address of the gateway that was created followed by clicking Next.
 
 [#predeploy4]
-.Quick Start architecture for {partner-product-short-name} on AWS
+.Quick Start post-deployment for {partner-product-short-name} on AWS
 image::../images/predeploy4.png[Predeployment]
 
 * Provide a name for the Route (i.e. AWS-Gateway-Inbound) followed by configuring your Route relative to the on-site gateway. This generally means ensuring that the Protocol and Algorithm match the on-site encryption gateway. As well as setting the Listen IP to 0.0.0.0 and the Listen Port to the previously inputted publicly accessible port that was generated through the Quickstart.
 
 [#predeploy5]
-.Quick Start architecture for {partner-product-short-name} on AWS
+.Quick Start post-deployment for {partner-product-short-name} on AWS
 image::../images/predeploy5.png[Predeployment]
 
 * Input the EIP of the EC2 from the Quickstart - can be found be looking at the EC2 in the AWS Console or the Cloud Formation outputs for the Quickstart stack.
