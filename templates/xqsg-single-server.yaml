@@ -106,8 +106,8 @@ Resources:
         Statement: 
           - Effect: "Allow"
             Resource: [
-              "arn:aws:ec2:*:*:instance/*",
-              "arn:aws:ec2:*:*:elastic-ip/*"
+              "arn:${AWS::Partition}:ec2:*:*:instance/*",
+              "arn:${AWS::Partition}:ec2:*:*:elastic-ip/*"
             ]
             Action: [
               "ec2:AssociateAddress",
