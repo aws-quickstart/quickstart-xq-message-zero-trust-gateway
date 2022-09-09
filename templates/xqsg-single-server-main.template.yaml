@@ -106,8 +106,9 @@ Parameters:
   # AWS Environment
   VPCCIDR:
     AllowedPattern: '[a-zA-Z0-9]+\..+'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.0.0/16
-    Description: CIDR Block for the VPC
+    Description: CIDR Block for the VPC.
     Type: String
   AvailabilityZones:
     Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
@@ -115,17 +116,21 @@ Parameters:
     Type: List<AWS::EC2::AvailabilityZone::Name>
   PublicSubnet1CIDR:
     AllowedPattern: '[a-zA-Z0-9]+\..+'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.129.0/24
-    Description: CIDR Block for the Public DMZ Subnet located in AZ1
+    Description: CIDR Block for the Public DMZ Subnet located in AZ1.
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: '[a-zA-Z0-9]+\..+'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.145.0/24
-    Description: CIDR Block for the Public DMZ Subnet located in AZ2
+    Description: CIDR Block for the Public DMZ Subnet located in AZ2.
     Type: String
   KeyPairName:
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: KeyPair name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). Must be the name of an existing EC2 KeyPair.
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances.
     Type: AWS::EC2::KeyPair::KeyName
   InstanceType:
     AllowedValues:
@@ -141,67 +146,107 @@ Parameters:
     Description: Amazon EC2 instance type
     Type: String
   SourceCIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    AllowedPattern: '[a-zA-Z0-9]+\..+'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
     Description: The CIDR address from your gateway will receive traffic
     Type: String
   # AWS Transfer Family
   SftpUserName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: SFTP username can include numbers, lowercase letters,
+      uppercase letters, and hyphens (-).
     Description: Username for SFTP access.
     Default: sftpuser
     Type: String
   SftpPubKey:
+    AllowedPattern: ^ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3} ([^@]+@[^@]+)$
+    ConstraintDescription: Must be a valid SSH-2 RSA key.
     Description: Public key for SFTP access.
     Type: String
   SftpBucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Bucket names can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
     Description: Unique name for SFTP data bucket.
     Type: String
   # XQ Gateway
   QuantumEndpoint:
-    Description: URL for Quantum service endpoint
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Quantum service endpoint.
     Default: https://quantum.xqmsg.net/v2
     Type: String
   ValidationEndpoint:
-    Description: URL for Validation service endpoint
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Validation service endpoint.
     Default: https://validation.xqmsg.net/v2
     Type: String
   SubscriptionEndpoint:
-    Description: URL for Subscription service endpoint
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Subscription service endpoint.
     Default: https://subscription.xqmsg.net/v2
     Type: String
   ManageEndpoint:
-    Description: URL for Management service endpoint
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Management service endpoint.
     Default: https://dashboard.xqmsg.net/v2
     Type: String
   XqApiKey:
-    Description: General API key generated from https://manage.xqmsg.com/applications
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Valid XQ API keys can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). They cannot start or end with a hyphen
+      (-).
+    Description: General API key generated from https://manage.xqmsg.com/applications.
     Type: String
   DashboardApiKey:
-    Description: Dashboard API key generated from https://manage.xqmsg.com/applications
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Valid XQ dashboard API keys can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). They cannot start or end with a hyphen
+      (-).
+    Description: Dashboard API key generated from https://manage.xqmsg.com/applications.
     Type: String
   TeamId:
-    Description: XQ Team ID associated with Gateway
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The XQ TeamID is a 1-4 digit number.
+    Description: XQ Team ID associated with Gateway.
     Type: String
   GatewayConfigId:
-    Description: ID from the Gateway configuration page
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The XQ TeamID is a 1-4 digit number.
+    Description: ID from the Gateway configuration page.
     Type: String
   TrustedRangeKey:
-    Description: The gateway config secure key from the dashboard
+    AllowedPattern: ^[0-9a-zA-Z]*$
+    ConstraintDescription: Valid XQ trusted range keys can include numbers, lowercase
+      letters, uppercase letters.
+    Description: The gateway config secure key from the dashboard.
     Type: String
   HeartBeatInterval:
-    Description: Number of seconds between each client-server heartbeat
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The heartbeat interval must be a number.
+    Description: Number of seconds between each client-server heartbeat.
     Default: 60
     Type: String
   MonitorSocket:
-    Description: The port number that the monitor application will listen to for UDP updates from the gateway
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The monitor socket must be a number.
+    Description: The port number that the monitor application will listen to for UDP updates from the gateway.
     Default: 9091
     Type: String
   GatewaySocket:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The gateway socket must be a number.
     Description: The port number that the gateway will listen to for UDP requests for the monitor
     Default: 9092
     Type: String
   RoutePort:
-    Description: The port that the XQSG will be receiving traffic on - for security group configuration
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The route port must be a number.
+    Description: The port that the XQSG will be receiving traffic on - for security group configuration.
     Type: String
   # QuickStart
   QSS3BucketName:
@@ -209,7 +254,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: xq-quickstart-testing
+    Default: aws-quickstart
     Description: S3 bucket name for the Quick Start assets. This string can include
       numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
       or end with a hyphen (-).
@@ -218,7 +263,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
-    Default: xqsg-quickstart/
+    Default: quickstart-xq-message-zero-trust-gateway/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
@@ -254,7 +299,7 @@ Resources:
     #   - VPCStack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sg.yaml'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sg.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -269,7 +314,7 @@ Resources:
       - SFTPStack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server.yaml'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -298,7 +343,7 @@ Resources:
       # - SGStack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sftp.yaml'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sftp.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
