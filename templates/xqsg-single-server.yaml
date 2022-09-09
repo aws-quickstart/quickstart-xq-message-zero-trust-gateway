@@ -100,12 +100,15 @@ Resources:
   XqsgPolicy: 
     Type: "AWS::IAM::Policy"
     Properties: 
-      PolicyName: "root"
+      PolicyName: !Sub '${AWS::StackName}-limited-access'
       PolicyDocument: 
         Version: "2012-10-17"
         Statement: 
           - Effect: "Allow"
-            Resource: "*"
+            Resource: [
+              "arn:aws:ec2:*:*:instance/*",
+              "arn:aws:ec2:*:*:elastic-ip/*"
+            ]
             Action: [
               "ec2:AssociateAddress",
               "ec2:DisassociateAddress"
