@@ -17,6 +17,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref 'VPCID'
+      GroupName: !Sub '${AWS::StackName}-Ingress'
       GroupDescription: Enable communications with the external XQSG and SFTP Service
 
   ServerSecurityGroupIngressExt:
