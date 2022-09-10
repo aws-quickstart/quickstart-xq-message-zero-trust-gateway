@@ -141,9 +141,9 @@ Parameters:
       - c5.xlarge
       - m5.large
       - m5.xlarge
-    ConstraintDescription: must be a valid EC2 instance type.
+    ConstraintDescription: Must contain valid instance type.
     Default: c5.large
-    Description: Amazon EC2 instance type
+    Description: Amazon EC2 instance type.
     Type: String
   SourceCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
