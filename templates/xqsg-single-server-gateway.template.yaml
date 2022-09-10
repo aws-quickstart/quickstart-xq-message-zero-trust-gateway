@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS CloudFormation Template: Single-node XQ Secure Gateway (qs-xxxxxx)'
 Metadata:
   QuickStartDocumentation:
-    EntrypointName: Launch into a new VPC
+    EntrypointName: Launch into an existing VPC
     Order: 1
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -278,37 +278,31 @@ Parameters:
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
-  VPCStack:
+  SGStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sg.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        AvailabilityZones: !Join
-          - ','
-          - !Ref 'AvailabilityZones'
-        KeyPairName: !Ref 'KeyPairName'
-        NATInstanceType: t3.small
-        NumberOfAZs: '2'
-        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
-        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
-        CreatePrivateSubnets: 'false'
-        VPCCIDR: !Ref 'VPCCIDR'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+        SourceCIDR: !Ref 'SourceCIDR'
+        RoutePort: !Ref 'RoutePort'
   GatewayStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - SFTPStack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-gateway.template.yaml'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         InstanceType: !Ref 'InstanceType'
         KeyPairName: !Ref 'KeyPairName'
         PublicSubnetId: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        SGID: !GetAtt 'SGStack.Outputs.SGID'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
         QuantumEndpoint: !Ref 'QuantumEndpoint'
         ValidationEndpoint: !Ref 'ValidationEndpoint'
@@ -322,15 +316,22 @@ Resources:
         HeartBeatInterval: !Ref 'HeartBeatInterval'
         MonitorSocket: !Ref 'MonitorSocket'
         GatewaySocket: !Ref 'GatewaySocket'
-        SourceCIDR: !Ref 'SourceCIDR'
-        RoutePort: !Ref 'RoutePort'
+  SFTPStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sftp.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
         SftpUserName: !Ref 'SftpUserName'
         SftpPubKey: !Ref 'SftpPubKey'
         SftpBucketName: !Ref 'SftpBucketName'
+        SGID: !GetAtt 'SGStack.Outputs.SGID'
         PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
         PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
         VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
-  Outputs:
+Outputs:
   VPCID:
     Description: VPC ID
     Value: !GetAtt 'VPCStack.Outputs.VPCID'
