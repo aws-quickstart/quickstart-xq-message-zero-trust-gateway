@@ -3,7 +3,7 @@ Description: 'AWS CloudFormation Template: Single-node XQ Secure Gateway (qs-xxx
 Metadata:
   QuickStartDocumentation:
     EntrypointName: Launch into an existing VPC
-    Order: 1
+    Order: 2
   AWS::CloudFormation::Interface:
     ParameterGroups:
       # AWS Environment
