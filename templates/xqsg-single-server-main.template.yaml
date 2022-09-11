@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS CloudFormation Template: Single-node XQ Secure Gateway (qs-xxxxxx)'
 Metadata:
   QuickStartDocumentation:
-    EntrypointName: Launch into a new VPC
+    EntrypointName: Launch a new VPC
     Order: 1
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -298,8 +298,6 @@ Resources:
         VPCCIDR: !Ref 'VPCCIDR'
   GatewayStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - SFTPStack
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-gateway.template.yaml'
@@ -308,8 +306,12 @@ Resources:
       Parameters:
         InstanceType: !Ref 'InstanceType'
         KeyPairName: !Ref 'KeyPairName'
-        PublicSubnetId: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+        #VPCCIDR: !Ref 'VPCCIDR' 
+        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+        #PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         QuantumEndpoint: !Ref 'QuantumEndpoint'
         ValidationEndpoint: !Ref 'ValidationEndpoint'
         SubscriptionEndpoint: !Ref 'SubscriptionEndpoint'
@@ -322,15 +324,15 @@ Resources:
         HeartBeatInterval: !Ref 'HeartBeatInterval'
         MonitorSocket: !Ref 'MonitorSocket'
         GatewaySocket: !Ref 'GatewaySocket'
-        SourceCIDR: !Ref 'SourceCIDR'
-        RoutePort: !Ref 'RoutePort'
         SftpUserName: !Ref 'SftpUserName'
         SftpPubKey: !Ref 'SftpPubKey'
         SftpBucketName: !Ref 'SftpBucketName'
-        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
-        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
-        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
-  Outputs:
+        SourceCIDR: !Ref 'SourceCIDR'
+        RoutePort: !Ref 'RoutePort'
+        QSS3BucketName: !Ref 'QSS3BucketName'
+        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        QSS3BucketRegion: !Ref 'QSS3BucketRegion'  
+Outputs:
   VPCID:
     Description: VPC ID
     Value: !GetAtt 'VPCStack.Outputs.VPCID'
