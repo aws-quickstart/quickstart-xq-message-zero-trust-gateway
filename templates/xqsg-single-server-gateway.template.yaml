@@ -2,18 +2,18 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS CloudFormation Template: Single-node XQ Secure Gateway (qs-xxxxxx)'
 Metadata:
   QuickStartDocumentation:
-    EntrypointName: Launch a new VPC
-    Order: 1
+    EntrypointName: Launch into an existing VPC
+    Order: 2
   AWS::CloudFormation::Interface:
     ParameterGroups:
       # AWS Environment
       - Label:
           default: AWS Environment and Machine Configuration
         Parameters:
-          - VPCCIDR
-          - AvailabilityZones
+          - VPCID
+          - PublicSubnet1ID
+          - PublicSubnet2ID
           - PublicSubnet1CIDR
-          - PublicSubnet2CIDR
           - KeyPairName
           - InstanceType
           - SourceCIDR
@@ -50,14 +50,14 @@ Metadata:
           - QSS3BucketRegion
     ParameterLabels:
       # AWS Environment
-      VPCCIDR:
-        default: VPC CIDR
-      AvailabilityZones:
-        default: Availability Zones
+      VPCID:
+        default: Target VPC ID
+      PublicSubnet1ID:
+        default: Public Subnet 1 ID
+      PublicSubnet2ID:
+        default: Public Subnet 2 ID
       PublicSubnet1CIDR:
         default: Public Subnet 1 CIDR
-      PublicSubnet2CIDR:
-        default: Public Subnet 2 CIDR
       KeyPairName:
         default: Key Pair Name
       InstanceType:
@@ -107,27 +107,28 @@ Metadata:
         default: Quick Start S3 bucket region
 Parameters:
   # AWS Environment
-  VPCCIDR:
-    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Default: 10.0.0.0/16
-    Description: CIDR Block for the VPC.
+  VPCID:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: VPC IDs can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-).
+    Description: ID for target VPC.
     Type: String
-  AvailabilityZones:
-    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
-      The logical order is preserved and 2 AZs will be used for this deployment'
-    Type: List<AWS::EC2::AvailabilityZone::Name>
   PublicSubnet1CIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Default: 10.0.129.0/24
     Description: CIDR Block for the Public DMZ Subnet located in AZ1.
     Type: String
-  PublicSubnet2CIDR:
-    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Default: 10.0.145.0/24
-    Description: CIDR Block for the Public DMZ Subnet located in AZ2.
+  PublicSubnet1ID:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Subnet IDs can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-).
+    Description: Subnet ID for public subnet 1.
+    Type: String
+  PublicSubnet2ID:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Subnet IDs can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-).
+    Description: Subnet ID for public subnet 2.
     Type: String
   KeyPairName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
@@ -278,40 +279,32 @@ Parameters:
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
-  VPCStack:
+  SGStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sg.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        AvailabilityZones: !Join
-          - ','
-          - !Ref 'AvailabilityZones'
-        KeyPairName: !Ref 'KeyPairName'
-        NATInstanceType: t3.small
-        NumberOfAZs: '2'
-        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
-        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
-        CreatePrivateSubnets: 'false'
-        VPCCIDR: !Ref 'VPCCIDR'
+        VPCID: !Ref 'VPCID'
+        SourceCIDR: !Ref 'SourceCIDR'
+        RoutePort: !Ref 'RoutePort'
   GatewayStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - SFTPStack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-gateway.template.yaml'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         InstanceType: !Ref 'InstanceType'
         KeyPairName: !Ref 'KeyPairName'
-        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
-        #VPCCIDR: !Ref 'VPCCIDR' 
-        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
-        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+        PublicSubnetId: !Ref 'PublicSubnet1ID'
+        SGID: !GetAtt 'SGStack.Outputs.SGID'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
-        #PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         QuantumEndpoint: !Ref 'QuantumEndpoint'
         ValidationEndpoint: !Ref 'ValidationEndpoint'
         SubscriptionEndpoint: !Ref 'SubscriptionEndpoint'
@@ -324,18 +317,25 @@ Resources:
         HeartBeatInterval: !Ref 'HeartBeatInterval'
         MonitorSocket: !Ref 'MonitorSocket'
         GatewaySocket: !Ref 'GatewaySocket'
+  SFTPStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sftp.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
         SftpUserName: !Ref 'SftpUserName'
         SftpPubKey: !Ref 'SftpPubKey'
         SftpBucketName: !Ref 'SftpBucketName'
-        SourceCIDR: !Ref 'SourceCIDR'
-        RoutePort: !Ref 'RoutePort'
-        QSS3BucketName: !Ref 'QSS3BucketName'
-        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
-        QSS3BucketRegion: !Ref 'QSS3BucketRegion'  
+        SGID: !GetAtt 'SGStack.Outputs.SGID'
+        PublicSubnet1ID: !Ref 'PublicSubnet1ID'
+        PublicSubnet2ID: !Ref 'PublicSubnet2ID'
+        VPCID: !Ref 'VPCID'
 Outputs:
   VPCID:
     Description: VPC ID
-    Value: !GetAtt 'VPCStack.Outputs.VPCID'
+    Value: !Ref 'VPCID'
   pubsub1:
-    Description: VPC ID
-    Value: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+    Description: Public Subnet ID
+    Value: !Ref 'PublicSubnet1ID'
