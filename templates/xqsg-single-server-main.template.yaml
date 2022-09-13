@@ -17,6 +17,7 @@ Metadata:
           - KeyPairName
           - InstanceType
           - SourceCIDR
+          - MgmtCIDR
       # AWS Transfer Family
       - Label:
           default: AWS Transfer Family Configuration
@@ -152,6 +153,11 @@ Parameters:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
     Description: The CIDR address from your gateway will receive traffic
+    Type: String
+  MgmtCIDR:
+    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    Description: The CIDR address from which you will manage your gateway via SSH.
     Type: String
   # AWS Transfer Family
   SftpUserName:
@@ -328,6 +334,7 @@ Resources:
         SftpPubKey: !Ref 'SftpPubKey'
         SftpBucketName: !Ref 'SftpBucketName'
         SourceCIDR: !Ref 'SourceCIDR'
+        MgmtCIDR: !Ref 'MgmtCIDR'
         RoutePort: !Ref 'RoutePort'
         QSS3BucketName: !Ref 'QSS3BucketName'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
