@@ -18,7 +18,7 @@ tests:
       SourceCIDR: 10.0.0.0/16
       MgmtCIDR: 10.0.0.0/16
       SftpUserName: sftpuser
-      SftpPubKey: 'ssh-rsa'
+      SftpPubKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCnAWd8o8Twp/xvlXr5TAvLz7px4k20YKRX1c8bNlWOsZJNwAEoGu9gZELwLtQOkfDb/cfaDAN8lYceobKdJuhwOnWlWgYF9Ppx7BBJlFJz6+w7ltorctJnKZikTuTvG8uI6gsFgnc57Qvmg3uRhHtKhYtiKjGnqjZFsyAagVy2GRrkb1BBiQ672VJEQJMeVUb0VQD2eEARhhg0lhfjsJNcww7pPepB7wsPeLrr4MAIOsfES9F59kjK6HeWBCzBzwiJYeVYjXB99Nho9L4sPeNrbZRoVsVnIPR8GDYSVDUTxGkWlovFn/nO3MdJHG+L6597nPPi0Heuwamiu3N5QKOoyWFgD2LqCxrd+UtZZVB36D8Wc79SoLaQX3Aglq+NEDq+e2iPbjouOXVS4OQ== none@local'
       SftpBucketName: 'xqsg-$[taskcat_random-string]'
       QuantumEndpoint: https://quantum.xqmsg.net/v2
       ValidationEndpoint: https://stg-validation.xqmsg.net/v2
