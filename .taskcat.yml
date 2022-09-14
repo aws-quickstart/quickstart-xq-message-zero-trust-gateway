@@ -9,21 +9,17 @@ project:
 tests:
   xqsg-server:
     parameters:
-      # VPCID: vpc-044910546e21d4547
-      # PublicSubnet1ID: subnet-0c242c70ba14572aa
-      # PublicSubnet2ID: subnet-0c9ae08fc79a81d9e
       VPCCIDR: 10.0.0.0/16
       AvailabilityZones: $[alfred_getaz_2]
       PublicSubnet1CIDR: 10.0.129.0/24
       PublicSubnet2CIDR: 10.0.145.0/24
-      KeyPairName: 'some-key-pair'
+      KeyPairName: ''
       InstanceType: 't3.large'
       SourceCIDR: 10.0.0.0/16
       MgmtCIDR: 10.0.0.0/16
       SftpUserName: sftpuser
-      SftpPubKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCnAWd8o8Twp/xvlXr5TAvLz7px4oGu9gZELwuRhHtKhYtiSBk5KKknNu1Tqaekb8NtjZSDjIroUTmcuFe+aHNXMKSXtTmfJa/Nw6nqQi4ZV2== someone@local'
+      SftpPubKey: 'ssh-rsa'
       SftpBucketName: 'xqsg-$[taskcat_random-string]'
-      # SftpBucketName: 'xqsg-quickstart-testbucket2'
       QuantumEndpoint: https://quantum.xqmsg.net/v2
       ValidationEndpoint: https://stg-validation.xqmsg.net/v2
       SubscriptionEndpoint: https://stg-subscription.xqmsg.net/v2
@@ -38,11 +34,10 @@ tests:
       GatewaySocket: '9092'
       RoutePort: '3081'
       QSS3BucketName: aws-quickstart
-      QSS3KeyPrefix: quickstart-microsoft-rdgateway/
+      QSS3KeyPrefix: quickstart-xq-message-zero-trust-gateway/
       QSS3BucketRegion: 'us-east-1'
     regions:
     - us-east-1
     - us-west-1
     template: templates/xqsg-single-server-main.template.yaml
-    # template: templates/xqsg-single-server-gateway.template.yaml
 
