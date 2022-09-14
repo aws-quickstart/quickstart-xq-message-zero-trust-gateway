@@ -38,7 +38,7 @@ tests:
       GatewaySocket: '9092'
       RoutePort: '3081'
       QSS3BucketName: aws-quickstart
-      QSS3KeyPrefix: quickstart-microsoft-rdgateway/
+      QSS3KeyPrefix: quickstart-xq-message-zero-trust-gateway/
       QSS3BucketRegion: 'us-east-1'
     regions:
     - us-east-1
