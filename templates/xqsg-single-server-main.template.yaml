@@ -288,19 +288,20 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         AvailabilityZones: !Join
           - ','
           - !Ref 'AvailabilityZones'
-        KeyPairName: !Ref 'KeyPairName'
-        NATInstanceType: t3.small
         NumberOfAZs: '2'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         CreatePrivateSubnets: 'false'
+        CreateAdditionalPrivateSubnets: 'false'
+        CreateVPCFlowLogsToCloudWatch: 'false'
+        CreateNATGateways: 'false'
         VPCCIDR: !Ref 'VPCCIDR'
   GatewayStack:
     Type: AWS::CloudFormation::Stack
@@ -313,11 +314,9 @@ Resources:
         InstanceType: !Ref 'InstanceType'
         KeyPairName: !Ref 'KeyPairName'
         VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
-        #VPCCIDR: !Ref 'VPCCIDR' 
         PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
         PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
-        #PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         QuantumEndpoint: !Ref 'QuantumEndpoint'
         ValidationEndpoint: !Ref 'ValidationEndpoint'
         SubscriptionEndpoint: !Ref 'SubscriptionEndpoint'
