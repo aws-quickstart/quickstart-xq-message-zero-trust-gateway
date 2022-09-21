@@ -10,7 +10,7 @@ tests:
   xqsg-server:
     parameters:
       VPCCIDR: 10.0.0.0/16
-      AvailabilityZones: $[alfred_getaz_2]
+      AvailabilityZones: $[taskcat_getaz_2]
       PublicSubnet1CIDR: 10.0.129.0/24
       PublicSubnet2CIDR: 10.0.145.0/24
       KeyPairName: ''
