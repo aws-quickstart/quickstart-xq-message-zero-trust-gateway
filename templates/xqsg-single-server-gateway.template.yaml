@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation Template: Single-node XQ Secure Gateway (qs-xxxxxx)'
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: Launch into an existing VPC
+    Order: 2
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      # AWS Environment
+      - Label:
+          default: AWS Environment and Machine Configuration
+        Parameters:
+          - VPCID
+          - PublicSubnet1ID
+          - PublicSubnet2ID
+          - PublicSubnet1CIDR
+          - KeyPairName
+          - InstanceType
+          - SourceCIDR
+          - MgmtCIDR
+      # AWS Transfer Family
+      - Label:
+          default: AWS Transfer Family Configuration
+        Parameters:
+          - SftpUserName
+          - SftpPubKey
+          - SftpBucketName
+      # XQ Gateway
+      - Label:
+          default: Gateway Configuration
+        Parameters:
+          - QuantumEndpoint
+          - ValidationEndpoint
+          - SubscriptionEndpoint
+          - ManageEndpoint
+          - XqApiKey
+          - DashboardApiKey
+          - TeamId
+          - GatewayConfigId
+          - TrustedRangeKey
+          - HeartBeatInterval
+          - MonitorSocket
+          - GatewaySocket
+          - RoutePort
+      # QuickStart
+      - Label:
+          default: AWS Quick Start Configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+          - QSS3BucketRegion
+    ParameterLabels:
+      # AWS Environment
+      VPCID:
+        default: Target VPC ID
+      PublicSubnet1ID:
+        default: Public Subnet 1 ID
+      PublicSubnet2ID:
+        default: Public Subnet 2 ID
+      PublicSubnet1CIDR:
+        default: Public Subnet 1 CIDR
+      KeyPairName:
+        default: Key Pair Name
+      InstanceType:
+        default: Amazon EC2 instance type
+      SourceCIDR:
+        default: Source CIDR for Access
+      # AWS Transfer Family
+      SftpUserName:
+        default: Username for SFTP access
+      SftpPubKey:
+        default: Public key for SFTP access
+      SftpBucketName:
+        default: Unique name for SFTP data bucket
+      # XQ Gateway
+      QuantumEndpoint:
+        default: URL for Quantum service endpoint
+      ValidationEndpoint:
+        default: URL for Validation service endpoint
+      SubscriptionEndpoint:
+        default: URL for Subscription service endpoint
+      ManageEndpoint:
+        default: URL for Management service endpoint
+      XqApiKey:
+        default: General API key
+      DashboardApiKey:
+        default: Dashboard API key
+      TeamId:
+        default: XQ Team ID associated with Gateway
+      GatewayConfigId:
+        default: ID from the Gateway configuration page
+      TrustedRangeKey:
+        default: The gateway config secure key from the dashboard
+      HeartBeatInterval:
+        default: Number of seconds between each client-server heartbeat
+      MonitorSocket:
+        default: The port number that the monitor application will listen to for UDP updates from the gateway
+      GatewaySocket:
+        default: The port number that the gateway will listen to for UDP requests for the monitor
+      RoutePort:
+        default: The port that the XQSG will be receiving traffic on - for security group configuration
+      # Quickstart
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+Parameters:
+  # AWS Environment
+  VPCID:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: VPC IDs can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-).
+    Description: ID for target VPC.
+    Type: String
+  PublicSubnet1CIDR:
+    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    Description: CIDR Block for the Public DMZ Subnet located in AZ1.
+    Type: String
+  PublicSubnet1ID:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Subnet IDs can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-).
+    Description: Subnet ID for public subnet 1.
+    Type: String
+  PublicSubnet2ID:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Subnet IDs can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-).
+    Description: Subnet ID for public subnet 2.
+    Type: String
+  KeyPairName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: KeyPair name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). Must be the name of an existing EC2 KeyPair.
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances.
+    Type: AWS::EC2::KeyPair::KeyName
+  InstanceType:
+    AllowedValues:
+      - t3.small
+      - t3.medium
+      - t3.large
+      - c5.large
+      - c5.xlarge
+      - m5.large
+      - m5.xlarge
+    ConstraintDescription: Must contain valid instance type.
+    Default: c5.large
+    Description: Amazon EC2 instance type.
+    Type: String
+  SourceCIDR:
+    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    Description: The CIDR address from your gateway will receive traffic
+    Type: String
+  MgmtCIDR:
+    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    Description: The CIDR address from which you will manage your gateway via SSH.
+    Type: String
+  # AWS Transfer Family
+  SftpUserName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: SFTP username can include numbers, lowercase letters,
+      uppercase letters, and hyphens (-).
+    Description: Username for SFTP access.
+    Default: sftpuser
+    Type: String
+  SftpPubKey:
+    AllowedPattern: ^ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3} ([^@]+@[^@]+)$
+    ConstraintDescription: Must be a valid SSH-2 RSA key.
+    Description: Public key for SFTP access.
+    Type: String
+  SftpBucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Bucket names can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Description: Unique name for SFTP data bucket.
+    Type: String
+  # XQ Gateway
+  QuantumEndpoint:
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Quantum service endpoint.
+    Default: https://quantum.xqmsg.net/v2
+    Type: String
+  ValidationEndpoint:
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Validation service endpoint.
+    Default: https://validation.xqmsg.net/v2
+    Type: String
+  SubscriptionEndpoint:
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Subscription service endpoint.
+    Default: https://subscription.xqmsg.net/v2
+    Type: String
+  ManageEndpoint:
+    AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
+    ConstraintDescription: Must be a valid URL.
+    Description: URL for Management service endpoint.
+    Default: https://dashboard.xqmsg.net/v2
+    Type: String
+  XqApiKey:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Valid XQ API keys can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). They cannot start or end with a hyphen
+      (-).
+    Description: General API key generated from https://manage.xqmsg.com/applications.
+    Type: String
+  DashboardApiKey:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Valid XQ dashboard API keys can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). They cannot start or end with a hyphen
+      (-).
+    Description: Dashboard API key generated from https://manage.xqmsg.com/applications.
+    Type: String
+  TeamId:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The XQ TeamID is a 1-4 digit number.
+    Description: XQ Team ID associated with Gateway.
+    Type: String
+  GatewayConfigId:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The XQ TeamID is a 1-4 digit number.
+    Description: ID from the Gateway configuration page.
+    Type: String
+  TrustedRangeKey:
+    AllowedPattern: ^[0-9a-zA-Z]*$
+    ConstraintDescription: Valid XQ trusted range keys can include numbers, lowercase
+      letters, uppercase letters.
+    Description: The gateway config secure key from the dashboard.
+    Type: String
+  HeartBeatInterval:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The heartbeat interval must be a number.
+    Description: Number of seconds between each client-server heartbeat.
+    Default: 60
+    Type: String
+  MonitorSocket:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The monitor socket must be a number.
+    Description: The port number that the monitor application will listen to for UDP updates from the gateway.
+    Default: 9091
+    Type: String
+  GatewaySocket:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The gateway socket must be a number.
+    Description: The port number that the gateway will listen to for UDP requests for the monitor
+    Default: 9092
+    Type: String
+  RoutePort:
+    AllowedPattern: ^[0-9]*$
+    ConstraintDescription: The route port must be a number.
+    Description: The port that the XQSG will be receiving traffic on - for security group configuration.
+    Type: String
+  # QuickStart
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-xq-message-zero-trust-gateway/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+Resources:
+  SGStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sg.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        VPCID: !Ref 'VPCID'
+        SourceCIDR: !Ref 'SourceCIDR'
+        MgmtCIDR: !Ref 'MgmtCIDR'
+        RoutePort: !Ref 'RoutePort'
+  GatewayStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - SFTPStack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        InstanceType: !Ref 'InstanceType'
+        KeyPairName: !Ref 'KeyPairName'
+        PublicSubnetId: !Ref 'PublicSubnet1ID'
+        SGID: !GetAtt 'SGStack.Outputs.SGID'
+        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+        QuantumEndpoint: !Ref 'QuantumEndpoint'
+        ValidationEndpoint: !Ref 'ValidationEndpoint'
+        SubscriptionEndpoint: !Ref 'SubscriptionEndpoint'
+        ManageEndpoint: !Ref 'ManageEndpoint'
+        XqApiKey: !Ref 'XqApiKey'
+        DashboardApiKey: !Ref 'DashboardApiKey'
+        TeamId: !Ref 'TeamId'
+        GatewayConfigId: !Ref 'GatewayConfigId'
+        TrustedRangeKey: !Ref 'TrustedRangeKey'
+        HeartBeatInterval: !Ref 'HeartBeatInterval'
+        MonitorSocket: !Ref 'MonitorSocket'
+        GatewaySocket: !Ref 'GatewaySocket'
+  SFTPStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/xqsg-single-server-sftp.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        SftpUserName: !Ref 'SftpUserName'
+        SftpPubKey: !Ref 'SftpPubKey'
+        SftpBucketName: !Ref 'SftpBucketName'
+        SGID: !GetAtt 'SGStack.Outputs.SGID'
+        PublicSubnet1ID: !Ref 'PublicSubnet1ID'
+        PublicSubnet2ID: !Ref 'PublicSubnet2ID'
+        VPCID: !Ref 'VPCID'
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !Ref 'VPCID'
+  pubsub1:
+    Description: Public Subnet ID
+    Value: !Ref 'PublicSubnet1ID'

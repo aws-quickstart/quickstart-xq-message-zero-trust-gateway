@@ -1,0 +1,43 @@
+project:
+  name: quickstart-xq-message-zero-trust-gateway
+  owner: quickstart@xqmsg.com
+  package_lambda: false
+  shorten_stack_name: true
+  s3_regional_buckets: true
+  regions:
+  - us-east-1
+tests:
+  xqsg-server:
+    parameters:
+      VPCCIDR: 10.0.0.0/16
+      AvailabilityZones: $[taskcat_getaz_2]
+      PublicSubnet1CIDR: 10.0.129.0/24
+      PublicSubnet2CIDR: 10.0.145.0/24
+      KeyPairName: $[taskcat_getkeypair]
+      InstanceType: 't3.large'
+      SourceCIDR: 10.0.0.0/16
+      MgmtCIDR: 10.0.0.0/16
+      SftpUserName: sftpuser
+      SftpPubKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAA+z95eLeif3oVOWYrvaR6ql0x01gL0KQF2FsbNlWOsZJNwAEoGu9gZELwLtQOkfDb/cfaDAN8lYceobKdJuhwOnWlWgYF9Ppx7BBJl1iocnzMtACSWagHmABSIP1QuFMk0bQidgI4H6gg6phWOvZZVB36D8Wc79SoLaQX3Aglq+NEDq+e2iPbjouOXVS4OQ== none@local'
+      SftpBucketName: 'xqsg-$[taskcat_random-string]'
+      QuantumEndpoint: https://quantum.xqmsg.net/v2
+      ValidationEndpoint: https://stg-validation.xqmsg.net/v2
+      SubscriptionEndpoint: https://stg-subscription.xqmsg.net/v2
+      ManageEndpoint: https://stg-dashboard.xqmsg.net/v2
+      XqApiKey: '1'
+      DashboardApiKey: '1'
+      TeamId: '1'
+      GatewayConfigId: '1'
+      TrustedRangeKey: '1'
+      HeartBeatInterval: '30'
+      MonitorSocket: '9091'
+      GatewaySocket: '9092'
+      RoutePort: '3081'
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: quickstart-xq-message-zero-trust-gateway/
+      QSS3BucketRegion: $[taskcat_current_region]
+    regions:
+    - us-east-1
+    - us-west-1
+    template: templates/xqsg-single-server-main.template.yaml
+

@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation Template: XQ Server running on Linux (qs-xxxxxx)'
+
+Parameters:
+  VPCID:
+    Description: The ID of the VPC into which to deploy
+    Type: AWS::EC2::VPC::Id
+  SourceCIDR:
+    Description: The CIDR address from which you will connect to the instance
+    Type: String
+  MgmtCIDR:
+    Description: The CIDR address from which you will manage your gateway via SSH.
+    Type: String
+  RoutePort:
+    Description: The network port that this route will listen on
+    Type: String
+
+Resources:
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VPCID'
+      GroupName: !Sub '${AWS::StackName}-Ingress'
+      GroupDescription: Enable communications with the external XQSG and SFTP Service
+
+  ServerSecurityGroupIngressExt:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'ServerSecurityGroup'
+      IpProtocol: 'tcp'
+      FromPort: !Ref 'RoutePort'
+      ToPort: !Ref 'RoutePort'
+      CidrIp: !Ref 'SourceCIDR'
+
+  ServerSecurityGroupIngressSelf:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'ServerSecurityGroup'
+      IpProtocol: 'tcp'
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref 'MgmtCIDR'
+
+Outputs:
+  SGID:
+    Description: Security group for XQSG SFTP traffic
+    Value: !Ref 'ServerSecurityGroup'
