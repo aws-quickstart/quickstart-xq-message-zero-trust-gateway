@@ -13,7 +13,7 @@ tests:
       AvailabilityZones: $[taskcat_getaz_2]
       PublicSubnet1CIDR: 10.0.129.0/24
       PublicSubnet2CIDR: 10.0.145.0/24
-      KeyPairName: ''
+      KeyPairName: $[taskcat_getkeypair]
       InstanceType: 't3.large'
       SourceCIDR: 10.0.0.0/16
       MgmtCIDR: 10.0.0.0/16
