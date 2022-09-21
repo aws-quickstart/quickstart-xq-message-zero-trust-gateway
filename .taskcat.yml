@@ -33,9 +33,9 @@ tests:
       MonitorSocket: '9091'
       GatewaySocket: '9092'
       RoutePort: '3081'
-      QSS3BucketName: aws-quickstart
+      QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: quickstart-xq-message-zero-trust-gateway/
-      QSS3BucketRegion: 'us-east-1'
+      QSS3BucketRegion: $[taskcat_current_region]
     regions:
     - us-east-1
     - us-west-1
