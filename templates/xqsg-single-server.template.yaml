@@ -13,17 +13,6 @@ Parameters:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: AWS::EC2::KeyPair::KeyName
   InstanceType:
-    AllowedValues:
-      - t3.micro
-      - t3.small
-      - t3.medium
-      - t3.large
-      - c4.large
-      - c4.xlarge
-      - m4.large
-      - m4.xlarge
-    ConstraintDescription: must be a valid EC2 instance type.
-    Default: t3.micro
     Description: Amazon EC2 instance type
     Type: String
   SGID:
