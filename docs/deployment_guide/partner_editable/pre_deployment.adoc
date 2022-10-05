@@ -7,21 +7,21 @@
 
 [#predeploy1]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy1.png[Predeployment]
+image::../images/predeploy1.png[Predeployment]
 
 * Input the name of your Application (i.e. “Gateway”) followed by inputting a description if you would like.
 * In the following screen input the name of your key (i.e. “Production”) followed by selecting the “General” API key from the dropdown menu and continuing.
 
 [#predeploy2]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy2.png[Predeployment]
+image::../images/predeploy2.png[Predeployment]
 
 * Copy the generated Key to your clipboard and store it in a safe location. You will not be able to copy this key again.
 * Repeat steps 4 and 5 but in step 4 in the dropdown menu select the “Dashboard” API key option instead.
 
 [#predeploy3]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy3.png[Predeployment]
+image::../images/predeploy3.png[Predeployment]
 
 === Identifying your XQ Team ID
 * Navigate to manage.xqmsg.com and login using either the Magic Link or Google OAuth.
@@ -29,13 +29,13 @@ image::../docs/deployment_guide/images/predeploy3.png[Predeployment]
 
 [#predeploy4]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy4.png[Predeployment]
+image::../images/predeploy4.png[Predeployment]
 
 * The XQ Team ID can be identified under the Workspace section under ID. (4855 in this scenario).
 
 [#predeploy5]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy5.png[Predeployment]
+image::../images/predeploy5.png[Predeployment]
 
 === Identifying/Creating your Gateway Configuration Secure Key
 * Navigate to gateway.xqmsg.com and login using either the Magic Link or Google OAuth.
@@ -43,13 +43,13 @@ image::../docs/deployment_guide/images/predeploy5.png[Predeployment]
 
 [#predeploy6]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy6.png[Predeployment]
+image::../images/predeploy6.png[Predeployment]
 
 * Click the Add Range button followed by providing a Tag Name (i.e. Site-To-AWS) and provide an address range and input your site's public address. Once the Quickstart is complete you will need to navigate back and edit the address range to include your EC2 instances publicly accessible address.
 
 [#predeploy7]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy7.png[Predeployment]
+image::../images/predeploy7.png[Predeployment]
 
 * Once saved you will be able to copy the key by clicking the key icon next to the newly generated trusted IP range.
 
@@ -60,16 +60,16 @@ image::../docs/deployment_guide/images/predeploy7.png[Predeployment]
 
 [#predeploy8]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy8.png[Predeployment]
+image::../images/predeploy8.png[Predeployment]
 
 * Click the Create Gateway button followed by providing a name for your gateway that the Quickstart will generate. (i.e. AWS-Gateway)
 
 [#predeploy9]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy9.png[Predeployment]
+image::../images/predeploy9.png[Predeployment]
 
 * Once created, simply navigate back to the Gateways screen by selecting the Back button or by clicking on the Gateways option in the left-hand navigation menu. The Gateway ID can be identified directly below the name of the Gateway on this screen.
 
 [#predeploy10]
 .Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy10.png[Predeployment]
+image::../images/predeploy10.png[Predeployment]
