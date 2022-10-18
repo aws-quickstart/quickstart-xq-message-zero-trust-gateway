@@ -3,12 +3,12 @@
 :partner-product-name: XQ Message Zero Trust Gateway
 :partner-product-short-name: XQ Zero Trust Gateway
 :partner-company-name: XQ Message Inc.
-:doc-month: September
+:doc-month: October
 :doc-year: 2022
 :partner-contributors: Traian Talpalaru, XQ Message Inc.
 :other-contributors: Dan Cybulski, Decisive Tek Consulting
 // :aws-contributors: 
-:aws-ia-contributors: 
+:aws-ia-contributors: Shivansh Singh
 :deployment_time: 15 minutes
 :default_deployment_region: us-east-1
 // :private_repo:
