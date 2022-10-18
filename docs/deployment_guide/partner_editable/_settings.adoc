@@ -5,8 +5,8 @@
 :partner-company-name: XQ Message Inc.
 :doc-month: September
 :doc-year: 2022
-:partner-contributors: 
-// :other-contributors: Akua Mansa, Trek10
+:partner-contributors: Traian Talpalaru, XQ Message Inc.
+:other-contributors: Dan Cybulski, Decisive Tek Consulting
 // :aws-contributors: 
 :aws-ia-contributors: 
 :deployment_time: 15 minutes
