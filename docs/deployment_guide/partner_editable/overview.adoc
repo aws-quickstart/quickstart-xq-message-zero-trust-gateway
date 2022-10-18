@@ -3,3 +3,7 @@ This Quick Start deploys {partner-product-name} on the AWS Cloud. This guide cov
 // For advanced information about the product, troubleshooting, or additional functionality, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/operational/index.html[Operational Guide^].
 
 // For information about using this Quick Start for migrations, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/migration/index.html[Migration Guide^].
+
+With the XQ Zero Trust Gateway, users can ensure zero trust data protection for data moving to and from an Amazon Web Services (AWS) Virtual Private Cloud (VPC) as well as between AWS regions. The Gateway encrypts the data at the packet level and stores keys and policies with XQ’s distributed keystore. Every attempt to access the data is logged with XQ and users will be notified of any unauthorized attempt to access the data. The gateway is also used to decrypt data coming to AWS. 
+
+This Quick Start deploys an XQ Zero Trust Gateway to an AWS VPC. The VPC Network is designed to be fault tolerant and scalable utilizing an Auto Scaling Group. The auto-scaling group spans across up to two availability zones and allows you to maintain the same number of active EC2 instances within the group even during a failure and automatically scale the number of instances to meet demand. It has been created following best practices from AWS and XQ Message.
