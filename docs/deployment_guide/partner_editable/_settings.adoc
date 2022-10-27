@@ -1,9 +1,9 @@
 :quickstart-project-name: quickstart-xq-message-zero-trust-gateway
 :quickstart-github-org: aws-quickstart
-:partner-product-name: XQ Message Zero Trust Gateway
-:partner-product-short-name: XQ Zero Trust Gateway
+:partner-product-name: XQ Message Zero-Trust Gateway
+:partner-product-short-name: XQ Zero-Trust Gateway
 :partner-company-name: XQ Message Inc.
-:doc-month: October
+:doc-month: November
 :doc-year: 2022
 :partner-contributors: Traian Talpalaru, XQ Message Inc.
 :other-contributors: Dan Cybulski, Decisive Tek Consulting
