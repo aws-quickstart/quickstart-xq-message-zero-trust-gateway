@@ -1,75 +1,24 @@
-//Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
-
 == Predeployment steps
-=== Generating the General and Dashboard API Keys
-* Navigate to manage.xqmsg.com and login using either the Magic Link or Google OAuth.
-* On the left-hand side navigation menu scroll down to the “Applications” tab.
 
-[#predeploy1]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy1.png[Predeployment]
+. https://manage.xqmsg.com/login[Sign in to XQ^].
+//TODO Shivansh, The draft says to use either the magic link or Google OAuth. What about the Microsoft option? If it doesn't work, what should we say about avoiding it?
 
-* Input the name of your Application (i.e. “Gateway”) followed by inputting a description if you would like.
-* In the following screen input the name of your key (i.e. “Production”) followed by selecting the “General” API key from the dropdown menu and continuing.
+. Create your application and API keys.
+.. In the navigation pane, under *Developers*, choose *Applications*. 
+.. Enter an application name, for example, `Gateway`, and a description if you like. Choose *Create Application*. 
+.. Enter a name for your first API key, for example, `Production`. For the API group, choose *General*. Copy the generated key, and store it in a safe location. You will not be able to copy this key again.
+.. Add a second key in the *Dashboard* group. Copy this key and store it in a safe location.
 
-[#predeploy2]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy2.png[Predeployment]
+. Find your XQ team ID.
+.. Under your profile at the top-right, choose *Settings*. 
+.. Make a note of the XQ team ID, which appears under *Workspace* in the *ID* box.
 
-* Copy the generated Key to your clipboard and store it in a safe location. You will not be able to copy this key again.
-* Repeat steps 4 and 5 but in step 4 in the dropdown menu select the “Dashboard” API key option instead.
+. Create your gateway configuration secure key.
+.. In the navigation pane, choose *IP Ranges*. 
+.. Choose the *Add Range* button. Enter a tag name, for example, `Site-to-AWS`. For *Address Ranges*, enter your site's public address. Choose *Save New Range*. 
+.. Copy the key by choosing the key icon next to the newly generated trusted IP range. Store this key in a safe location.
 
-[#predeploy3]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy3.png[Predeployment]
-
-=== Identifying your XQ Team ID
-* Navigate to manage.xqmsg.com and login using either the Magic Link or Google OAuth.
-* In the top right hand corner click on your profile followed by Settings in the dropdown menu.
-
-[#predeploy4]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy4.png[Predeployment]
-
-* The XQ Team ID can be identified under the Workspace section under ID. (4855 in this scenario).
-
-[#predeploy5]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy5.png[Predeployment]
-
-=== Identifying/Creating your Gateway Configuration Secure Key
-* Navigate to gateway.xqmsg.com and login using either the Magic Link or Google OAuth.
-* In the left side navigation menu select the IP Ranges option.
-
-[#predeploy6]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy6.png[Predeployment]
-
-* Click the Add Range button followed by providing a Tag Name (i.e. Site-To-AWS) and provide an address range and input your site's public address. Once the Quickstart is complete you will need to navigate back and edit the address range to include your EC2 instances publicly accessible address.
-
-[#predeploy7]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy7.png[Predeployment]
-
-* Once saved you will be able to copy the key by clicking the key icon next to the newly generated trusted IP range.
-
-=== Identifying/Creating your ID from Gateway Configuration
-
-* Navigate to gateway.xqmsg.com and login using either the Magic Link or Google OAuth.
-* In the left side navigation menu select the Gateways option.
-
-[#predeploy8]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy8.png[Predeployment]
-
-* Click the Create Gateway button followed by providing a name for your gateway that the Quickstart will generate. (i.e. AWS-Gateway)
-
-[#predeploy9]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy9.png[Predeployment]
-
-* Once created, simply navigate back to the Gateways screen by selecting the Back button or by clicking on the Gateways option in the left-hand navigation menu. The Gateway ID can be identified directly below the name of the Gateway on this screen.
-
-[#predeploy10]
-.Quick Start pre-deployment for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/predeploy10.png[Predeployment]
+. Name your gateway.
+.. In the navigation pane, choose *Gateways*.
+.. Choose *Create Gateway*. Enter a name for the gateway that you want the Partner Solution to create, for example, `AWS-Gateway`. Choose *Create Gateway* again.
+.. In the navigation pane, choose *Gateways* again. Make a note of the gateway ID, which appears directly below the gateway name.

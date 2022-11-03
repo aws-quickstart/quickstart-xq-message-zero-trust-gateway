@@ -1,5 +1,5 @@
-:quickstart-project-name: quickstart-xq-message-zero-trust-gateway
-:quickstart-github-org: aws-quickstart
+:partner-solution-project-name: quickstart-xq-message-zero-trust-gateway
+:partner-solution-github-org: aws-quickstart
 :partner-product-name: XQ Message Zero-Trust Gateway
 :partner-product-short-name: XQ Zero-Trust Gateway
 :partner-company-name: XQ Message Inc.
@@ -8,7 +8,7 @@
 :partner-contributors: Traian Talpalaru, XQ Message Inc.
 :other-contributors: Dan Cybulski, Decisive Tek Consulting
 // :aws-contributors: 
-:aws-ia-contributors: Shivansh Singh
+:aws-ia-contributors: Shivansh Singh, AWS Integration & Automation team
 :deployment_time: 15 minutes
 :default_deployment_region: us-east-1
 // :private_repo:
