@@ -1,9 +1,8 @@
 == Predeployment steps
 
 . https://manage.xqmsg.com/login[Sign in to XQ^].
-//TODO Shivansh, The draft says to use either the magic link or Google OAuth. What about the Microsoft option? If it doesn't work, what should we say about avoiding it?
 
-. Create your application and API keys.
+. Create your application and your API keys.
 .. In the navigation pane, under *Developers*, choose *Applications*. 
 .. Enter an application name, for example, `Gateway`, and a description if you like. Choose *Create Application*. 
 .. Enter a name for your first API key, for example, `Production`. For the API group, choose *General*. Copy the generated key, and store it in a safe location. You will not be able to copy this key again.
@@ -13,7 +12,7 @@
 .. Under your profile at the top-right, choose *Settings*. 
 .. Make a note of the XQ team ID, which appears under *Workspace* in the *ID* box.
 
-. Create your gateway configuration secure key.
+. Create your gateway-configuration secure key.
 .. In the navigation pane, choose *IP Ranges*. 
 .. Choose the *Add Range* button. Enter a tag name, for example, `Site-to-AWS`. For *Address Ranges*, enter your site's public address. Choose *Save New Range*. 
 .. Copy the key by choosing the key icon next to the newly generated trusted IP range. Store this key in a safe location.

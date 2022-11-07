@@ -1,1 +1,1 @@
-This Partner Solution deploys {partner-product-name} on the AWS Cloud. This guide covers the steps necessary to deploy this Partner Solution.
+This Partner Solution deploys https://xqmsg.co/xq-blog/transfer-xq-zero-trust-data-protection-gateway-part-1[{partner-product-name}^] on the AWS Cloud. This guide covers the steps necessary to deploy this Partner Solution.

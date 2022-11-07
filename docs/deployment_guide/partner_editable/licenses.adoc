@@ -1,9 +1,3 @@
-// Include details about any licenses and how to sign up. Provide links as appropriate.
+You need an XQ Gateway license to deploy this Partner Solution. For details, refer to the XQ Message https://manage.xqmsg.com/pricing/transfer[plans and pricing page^].
 
-You need an XQ Gateway license to deploy this Partner Solution. If you don't already have a license, [__?]
-
-//TODO Shivansh, What do people need to know about the XQ Gateway license, such as any licensing options, how to get a license, whether there's a trial version, and whatever else they may be curious about?
-
-There is no cost to use this Partner Solution, but you will be billed for any AWS services or resources that this Partner Solution deploys. You are also responsible for any third-party licenses used while running this Partner Solution reference deployment, including the XQ Gateway license. 
-
-For more information, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^].
+There is no cost to use this Partner Solution, but you will be billed for any AWS services or resources that this Partner Solution deploys. You are also responsible for any third-party licenses used while running this Partner Solution reference deployment. For more information, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^].
