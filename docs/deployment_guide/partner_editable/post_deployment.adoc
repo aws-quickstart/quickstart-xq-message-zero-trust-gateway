@@ -1,12 +1,10 @@
 == Postdeployment steps
 . https://manage.xqmsg.com/login[Sign in to XQ^].
-//TODO Shivansh, Same question as under predeployment steps re: Microsoft option.
 
 . Update the range of trusted IP addresses.
 .. In the navigation pane, choose *IP Ranges*.
 .. Choose the tag for the address range that you created in the predeployment steps, for example, `Site-to-AWS`.
 .. Add the publicly accessible IP address of the deployed EC2 instance.
-//TODO Shivansh Since we've deployed four EC2 instances, should "instance" and "address" be plural? (Same question throughout the postdeployment steps.)
 
 . Configure the newly created gateway.
 .. In the navigation pane, choose *Gateways*.
