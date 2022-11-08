@@ -226,7 +226,7 @@ Parameters:
     Type: String
   GatewayConfigId:
     AllowedPattern: ^[0-9]*$
-    ConstraintDescription: The XQ team ID is a 1-4 digit number.
+    ConstraintDescription: The Gateway config ID is a 1-4 digit number.
     # Shivansh, Please edit the above constraint description for GatewayConfigId. Right now it’s identical to TeamId.
     Description: ID from the gateway-configuration page.
     Type: String
