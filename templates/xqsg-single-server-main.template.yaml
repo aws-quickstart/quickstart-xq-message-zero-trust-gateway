@@ -8,7 +8,7 @@ Metadata:
     ParameterGroups:
       # AWS Environment
       - Label:
-          default: AWS Environment and Machine Configuration
+          default: AWS environment and machine configuration
         Parameters:
           - VPCCIDR
           - AvailabilityZones
@@ -20,14 +20,14 @@ Metadata:
           - MgmtCIDR
       # AWS Transfer Family
       - Label:
-          default: AWS Transfer Family Configuration
+          default: AWS Transfer Family configuration
         Parameters:
           - SftpUserName
           - SftpPubKey
           - SftpBucketName
       # XQ Gateway
       - Label:
-          default: Gateway Configuration
+          default: Gateway configuration
         Parameters:
           - QuantumEndpoint
           - ValidationEndpoint
@@ -44,7 +44,7 @@ Metadata:
           - RoutePort
       # QuickStart
       - Label:
-          default: AWS Quick Start Configuration
+          default: AWS Partner Solution configuration
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
@@ -60,69 +60,68 @@ Metadata:
       PublicSubnet2CIDR:
         default: Public Subnet 2 CIDR
       KeyPairName:
-        default: Key Pair Name
+        default: Key-pair name
       InstanceType:
-        default: Amazon EC2 instance type
+        default: Instance type
       SourceCIDR:
-        default: Source CIDR for Access
+        default: Source CIDR
       # AWS Transfer Family
       SftpUserName:
-        default: Username for SFTP access
+        default: SFTP user name
       SftpPubKey:
-        default: Public key for SFTP access
+        default: SFTP public key
       SftpBucketName:
-        default: Unique name for SFTP data bucket
+        default: SFTP bucket name
       # XQ Gateway
       QuantumEndpoint:
-        default: URL for Quantum service endpoint
+        default: Quantum service endpoint
       ValidationEndpoint:
-        default: URL for Validation service endpoint
+        default: Validation service endpoint
       SubscriptionEndpoint:
-        default: URL for Subscription service endpoint
+        default: Subscription service endpoint
       ManageEndpoint:
-        default: URL for Management service endpoint
+        default: Management service endpoint
       XqApiKey:
-        default: General API key
+        default: General XQ API key
       DashboardApiKey:
         default: Dashboard API key
       TeamId:
-        default: XQ Team ID associated with Gateway
+        default: XQ team ID
       GatewayConfigId:
-        default: ID from the Gateway configuration page
+        default: Gateway-configuration ID
       TrustedRangeKey:
-        default: The gateway config secure key from the dashboard
+        default: Trusted-range key
       HeartBeatInterval:
-        default: Number of seconds between each client-server heartbeat
+        default: Heartbeat interval
       MonitorSocket:
-        default: The port number that the monitor application will listen to for UDP updates from the gateway
+        default: Monitor socket
       GatewaySocket:
-        default: The port number that the gateway will listen to for UDP requests for the monitor
+        default: Gateway socket
       RoutePort:
-        default: The port that the XQSG will be receiving traffic on - for security group configuration
+        default: Route port
       # Quickstart
       QSS3BucketName:
-        default: Quick Start S3 Bucket Name
+        default: Partner Solution S3 bucket name
       QSS3KeyPrefix:
-        default: Quick Start S3 Key Prefix
+        default: Partner Solution S3 key prefix
       QSS3BucketRegion:
-        default: Quick Start S3 bucket region
+        default: Partner Solution S3 bucket Region
 Parameters:
   # AWS Environment
   VPCCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.0.0/16
-    Description: CIDR Block for the VPC.
+    Description: CIDR block for the VPC.
     Type: String
   AvailabilityZones:
-    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
-      The logical order is preserved and 2 AZs will be used for this deployment'
+    Description: 'Availability Zones to use for the subnets in the VPC. The logical order is preserved, and 2 AZs will be used for this deployment.'
     Type: List<AWS::EC2::AvailabilityZone::Name>
   PublicSubnet1CIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.129.0/24
-    Description: CIDR Block for the Public DMZ Subnet located in AZ1.
+    Description: CIDR block for the public subnet located in Availability Zone 1.
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
@@ -132,9 +131,9 @@ Parameters:
     Type: String
   KeyPairName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: KeyPair name can include numbers, lowercase
-      letters, uppercase letters, and hyphens (-). Must be the name of an existing EC2 KeyPair.
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances.
+    ConstraintDescription: The key-pair name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). Must be the name of an existing EC2 key pair.
+    Description: Name of an existing EC2 key pair to enable SSH access to the instances.
     Type: AWS::EC2::KeyPair::KeyName
   InstanceType:
     AllowedValues:
@@ -147,24 +146,24 @@ Parameters:
       - m5.xlarge
     ConstraintDescription: Must contain valid instance type.
     Default: c5.large
-    Description: Amazon EC2 instance type.
+    Description: Type of Amazon EC2 instance.
     Type: String
   SourceCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Description: The CIDR address from your gateway will receive traffic
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
+    Description: CIDR address from which your gateway receives traffic.
     Type: String
   MgmtCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Description: The CIDR address from which you will manage your gateway via SSH.
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
+    Description: CIDR address from which you manage your gateway using SSH.
     Type: String
   # AWS Transfer Family
   SftpUserName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: SFTP username can include numbers, lowercase letters,
+    ConstraintDescription: The SFTP user name can include numbers, lowercase letters,
       uppercase letters, and hyphens (-).
-    Description: Username for SFTP access.
+    Description: User name for SFTP access.
     Default: sftpuser
     Type: String
   SftpPubKey:
@@ -177,7 +176,7 @@ Parameters:
     ConstraintDescription: Bucket names can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Description: Unique name for SFTP data bucket.
+    Description: Unique name for the SFTP data bucket.
     Type: String
   # XQ Gateway
   QuantumEndpoint:
@@ -189,19 +188,19 @@ Parameters:
   ValidationEndpoint:
     AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
     ConstraintDescription: Must be a valid URL.
-    Description: URL for Validation service endpoint.
+    Description: URL for validation service endpoint.
     Default: https://validation.xqmsg.net/v2
     Type: String
   SubscriptionEndpoint:
     AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
     ConstraintDescription: Must be a valid URL.
-    Description: URL for Subscription service endpoint.
+    Description: URL for subscription service endpoint.
     Default: https://subscription.xqmsg.net/v2
     Type: String
   ManageEndpoint:
     AllowedPattern: ^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$
     ConstraintDescription: Must be a valid URL.
-    Description: URL for Management service endpoint.
+    Description: URL for management service endpoint.
     Default: https://dashboard.xqmsg.net/v2
     Type: String
   XqApiKey:
@@ -220,66 +219,76 @@ Parameters:
     Type: String
   TeamId:
     AllowedPattern: ^[0-9]*$
-    ConstraintDescription: The XQ TeamID is a 1-4 digit number.
-    Description: XQ Team ID associated with Gateway.
+    ConstraintDescription: The XQ team ID is a 1-4 digit number.
+    Description: Team ID that's associated with the XQ gateway.
     Type: String
   GatewayConfigId:
     AllowedPattern: ^[0-9]*$
-    ConstraintDescription: The XQ TeamID is a 1-4 digit number.
-    Description: ID from the Gateway configuration page.
+    ConstraintDescription: The gateway-configuration ID is a 1-4 digit number.
+    Description: ID from the gateway-configuration page.
     Type: String
   TrustedRangeKey:
     AllowedPattern: ^[0-9a-zA-Z]*$
-    ConstraintDescription: Valid XQ trusted range keys can include numbers, lowercase
-      letters, uppercase letters.
-    Description: The gateway config secure key from the dashboard.
+    ConstraintDescription: Valid XQ trusted-range keys can include numbers, lowercase
+      letters, and uppercase letters.
+    Description: Gateway-configuration trusted-range key from the dashboard.
     Type: String
   HeartBeatInterval:
     AllowedPattern: ^[0-9]*$
     ConstraintDescription: The heartbeat interval must be a number.
-    Description: Number of seconds between each client-server heartbeat.
+    Description: Number of seconds between client-server heartbeats.
     Default: 60
     Type: String
   MonitorSocket:
     AllowedPattern: ^[0-9]*$
     ConstraintDescription: The monitor socket must be a number.
-    Description: The port number that the monitor application will listen to for UDP updates from the gateway.
+    Description: Port number that the monitor application listens to for UDP updates from the gateway.
     Default: 9091
     Type: String
   GatewaySocket:
     AllowedPattern: ^[0-9]*$
     ConstraintDescription: The gateway socket must be a number.
-    Description: The port number that the gateway will listen to for UDP requests for the monitor
+    Description: Port number that the gateway listens to for UDP requests for the monitor.
     Default: 9092
     Type: String
   RoutePort:
     AllowedPattern: ^[0-9]*$
     ConstraintDescription: The route port must be a number.
-    Description: The port that the XQSG will be receiving traffic on - for security group configuration.
+    Description: Port that the XQSG receives traffic on. Used for security-group configuration.
     Type: String
   # QuickStart
   QSS3BucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
-      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
-      (-).
+    AllowedPattern: ^[0-9a-z]+([0-9a-z-\.]*[0-9a-z])*$
+    ConstraintDescription:  >-
+      The S3 bucket name can include numbers, lowercase letters, 
+      and hyphens (-), but it cannot start or end with a hyphen.
     Default: aws-quickstart
-    Description: S3 bucket name for the Quick Start assets. This string can include
-      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
-      or end with a hyphen (-).
+    Description:  >-
+      Name of the S3 bucket for your copy of the deployment assets. Keep the default
+      name unless you are customizing the template. Changing the name updates code 
+      references to point to a new location.
     Type: String
   QSS3KeyPrefix:
-    AllowedPattern: ^[0-9a-zA-Z-/]*$
-    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slash (/).
+    AllowedPattern: ^([0-9a-zA-Z!-_\.\*'\(\)/]+/)*$
+    ConstraintDescription: >-
+      The S3 key prefix can include numbers, lowercase letters, uppercase letters, 
+      hyphens (-), underscores (_), periods (.), asterisks (*), single quotes ('),
+      open parenthesis ((), close parenthesis ()), and forward slashes (/). End the
+      prefix with a forward slash.
     Default: quickstart-xq-message-zero-trust-gateway/
-    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
-      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
-      forward slash (/).
+    Description: >-
+      S3 key prefix that is used to simulate a folder for your copy of the 
+      deployment assets. Keep the default prefix unless you are customizing 
+      the template. Changing the prefix updates code references to point to 
+      a new location.
     Type: String
   QSS3BucketRegion:
     Default: 'us-east-1'
-    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Description:  >-
+      AWS Region where the S3 bucket (QSS3BucketName) is hosted. Keep 
+      the default Region unless you are customizing the template. Changing the Region 
+      updates code references to point to a new location. When using your own bucket, 
+      specify the Region.
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
