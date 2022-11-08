@@ -226,8 +226,7 @@ Parameters:
     Type: String
   GatewayConfigId:
     AllowedPattern: ^[0-9]*$
-    ConstraintDescription: The Gateway config ID is a 1-4 digit number.
-   
+    ConstraintDescription: The gateway-configuration ID is a 1-4 digit number.
     Description: ID from the gateway-configuration page.
     Type: String
   TrustedRangeKey:
