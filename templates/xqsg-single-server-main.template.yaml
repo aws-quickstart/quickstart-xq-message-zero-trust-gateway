@@ -110,19 +110,18 @@ Parameters:
   # AWS Environment
   VPCCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.0.0/16
-    Description: CIDR Block for the VPC.
+    Description: CIDR block for the VPC.
     Type: String
   AvailabilityZones:
-    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
-      The logical order is preserved and 2 AZs will be used for this deployment'
+    Description: 'Availability Zones to use for the subnets in the VPC. The logical order is preserved, and 2 AZs will be used for this deployment'
     Type: List<AWS::EC2::AvailabilityZone::Name>
   PublicSubnet1CIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
     Default: 10.0.129.0/24
-    Description: CIDR Block for the Public DMZ Subnet located in AZ1.
+    Description: CIDR block for the public subnet located in Availability Zone 1.
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
@@ -132,9 +131,9 @@ Parameters:
     Type: String
   KeyPairName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: KeyPair name can include numbers, lowercase
-      letters, uppercase letters, and hyphens (-). Must be the name of an existing EC2 KeyPair.
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances.
+    ConstraintDescription: The key-pair name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). Must be the name of an existing EC2 key pair.
+    Description: Name of an existing EC2 key pair to enable SSH access to the instances.
     Type: AWS::EC2::KeyPair::KeyName
   InstanceType:
     AllowedValues:
@@ -151,20 +150,20 @@ Parameters:
     Type: String
   SourceCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Description: The CIDR address from your gateway will receive traffic
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
+    Description: CIDR address from which your gateway receives traffic.
     Type: String
   MgmtCIDR:
     AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x.
-    Description: The CIDR address from which you will manage your gateway via SSH.
+    ConstraintDescription: The CIDR block parameter must be in the form x.x.x.x/x.
+    Description: CIDR address from which you manage your gateway using SSH.
     Type: String
   # AWS Transfer Family
   SftpUserName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: SFTP username can include numbers, lowercase letters,
+    ConstraintDescription: The SFTP user name can include numbers, lowercase letters,
       uppercase letters, and hyphens (-).
-    Description: Username for SFTP access.
+    Description: User name for SFTP access.
     Default: sftpuser
     Type: String
   SftpPubKey:
@@ -177,7 +176,7 @@ Parameters:
     ConstraintDescription: Bucket names can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Description: Unique name for SFTP data bucket.
+    Description: Unique name for the SFTP data bucket.
     Type: String
   # XQ Gateway
   QuantumEndpoint:
@@ -256,7 +255,7 @@ Parameters:
   RoutePort:
     AllowedPattern: ^[0-9]*$
     ConstraintDescription: The route port must be a number.
-    Description: The port that the XQSG receives traffic on. Used for security-group configuration.
+    Description: Port that the XQSG receives traffic on. Used for security-group configuration.
     Type: String
   # QuickStart
   QSS3BucketName:
@@ -271,17 +270,26 @@ Parameters:
       references to point to a new location.
     Type: String
   QSS3KeyPrefix:
-    AllowedPattern: ^[0-9a-zA-Z-/]*$
-    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slash (/).
+    AllowedPattern: ^([0-9a-zA-Z!-_\.\*'\(\)/]+/)*$
+    ConstraintDescription: >-
+      The S3 key prefix can include numbers, lowercase letters, uppercase letters, 
+      hyphens (-), underscores (_), periods (.), asterisks (*), single quotes ('),
+      open parenthesis ((), close parenthesis ()), and forward slashes (/). End the
+      prefix with a forward slash.
     Default: quickstart-xq-message-zero-trust-gateway/
-    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
-      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
-      forward slash (/).
+    Description: >-
+      S3 key prefix that is used to simulate a folder for your copy of the 
+      deployment assets. Keep the default prefix unless you are customizing 
+      the template. Changing the prefix updates code references to point to 
+      a new location.
     Type: String
   QSS3BucketRegion:
     Default: 'us-east-1'
-    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Description:  >-
+      AWS Region where the S3 bucket (QSS3BucketName) is hosted. Keep 
+      the default Region unless you are customizing the template. Changing the Region 
+      updates code references to point to a new location. When using your own bucket, 
+      specify the Region.
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
